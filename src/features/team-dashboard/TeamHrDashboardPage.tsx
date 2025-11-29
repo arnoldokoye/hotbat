@@ -2,6 +2,11 @@ import { useState } from "react";
 import { TeamFiltersStrip } from "./components/TeamFiltersStrip";
 import { TeamHeader } from "./components/TeamHeader";
 import { TeamKeyMetricsRow } from "./components/TeamKeyMetricsRow";
+import { GameHrTable } from "./components/GameHrTable";
+import { PitcherHrVulnerabilityCard } from "./components/PitcherHrVulnerabilityCard";
+import { TeamHrTrendCard } from "./components/TeamHrTrendCard";
+import { TeamSplitsCard } from "./components/TeamSplitsCard";
+import { UpcomingGamesCard } from "./components/UpcomingGamesCard";
 import {
   defaultDateRange,
   defaultHomeAway,
@@ -10,8 +15,16 @@ import {
   defaultPitcherHand,
   defaultSeason,
   defaultSplit,
+  gameRows,
+  pitcherRows,
   teamInfo,
+  teamHrTimeSeries,
   teamKeyMetrics,
+  teamSplitsHomeAway,
+  teamSplitsLhpRhp,
+  teamSplitsMonthly,
+  teamSplitsOverview,
+  upcomingGames,
 } from "./mock/teamDashboardData";
 
 export function TeamHrDashboardPage() {
@@ -60,28 +73,21 @@ export function TeamHrDashboardPage() {
       <TeamKeyMetricsRow metrics={teamKeyMetrics} />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <PlaceholderCard title="TeamHrTrendCard placeholder" />
-        <PlaceholderCard title="PitcherHrVulnerabilityCard placeholder" />
+        <TeamHrTrendCard data={teamHrTimeSeries} />
+        <PitcherHrVulnerabilityCard rows={pitcherRows} teamName={teamInfo.teamName} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <PlaceholderCard title="UpcomingGamesCard placeholder" />
-        <PlaceholderCard title="TeamSplitsCard placeholder" />
+        <UpcomingGamesCard games={upcomingGames} />
+        <TeamSplitsCard
+          overview={teamSplitsOverview}
+          homeAway={teamSplitsHomeAway}
+          lhpRhp={teamSplitsLhpRhp}
+          monthly={teamSplitsMonthly}
+        />
       </div>
 
-      <PlaceholderCard title="GameHrTable placeholder" />
+      <GameHrTable rows={gameRows} />
     </section>
-  );
-}
-
-type PlaceholderCardProps = {
-  title: string;
-};
-
-function PlaceholderCard({ title }: PlaceholderCardProps) {
-  return (
-    <div className="rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 py-10 text-center text-sm font-semibold text-slate-500">
-      {title}
-    </div>
   );
 }
