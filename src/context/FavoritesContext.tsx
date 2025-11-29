@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  ReactNode,
+} from "react";
 import {
   addFavoritePlayer,
   addFavoriteTeam,
@@ -33,15 +40,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favoritePlayers, setFavoritePlayers] = useState<string[]>(() => getFavoritePlayers());
   const [defaults, setDefaultsState] = useState<HotbatDefaults>(() => getDefaults());
 
-  const setDefaults = (updater: (prev: HotbatDefaults) => HotbatDefaults) => {
+  const setDefaults = useCallback((updater: (prev: HotbatDefaults) => HotbatDefaults) => {
     setDefaultsState((prev) => {
       const next = updater(prev);
       setDefaultsStorage(next);
       return next;
     });
-  };
+  }, []);
 
-  const toggleTeamFavorite = (teamId: string) => {
+  const toggleTeamFavorite = useCallback((teamId: string) => {
     setFavoriteTeams((prev) => {
       const exists = isTeamFavorite(teamId);
       if (exists) {
@@ -51,9 +58,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       addFavoriteTeam(teamId);
       return Array.from(new Set([...prev, teamId]));
     });
-  };
+  }, []);
 
-  const togglePlayerFavorite = (playerId: string) => {
+  const togglePlayerFavorite = useCallback((playerId: string) => {
     setFavoritePlayers((prev) => {
       const exists = isPlayerFavorite(playerId);
       if (exists) {
@@ -63,7 +70,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       addFavoritePlayer(playerId);
       return Array.from(new Set([...prev, playerId]));
     });
-  };
+  }, []);
 
   const value = useMemo<FavoritesContextValue>(
     () => ({
@@ -74,7 +81,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       defaults,
       setDefaults,
     }),
-    [favoriteTeams, favoritePlayers, defaults],
+    [defaults, favoritePlayers, favoriteTeams, setDefaults, togglePlayerFavorite, toggleTeamFavorite],
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

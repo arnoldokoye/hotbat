@@ -20,20 +20,20 @@ export function PlayerHrDashboardPage({ initialData }: { initialData: PlayerDash
   const { favoritePlayers, togglePlayerFavorite, defaults, setDefaults } = useFavorites();
 
   const [season, setSeason] = useState(
-    defaults.playerDashboardFilters?.season ?? initialData.filters.defaultSeason,
+    defaults.playerDashboardFilters?.season ?? initialData?.filters.defaultSeason,
   );
   const [split, setSplit] = useState(
-    defaults.playerDashboardFilters?.split ?? initialData.filters.defaultSplit,
+    defaults.playerDashboardFilters?.split ?? initialData?.filters.defaultSplit,
   );
   const [dateRange, setDateRange] = useState(
-    defaults.playerDashboardFilters?.dateRange ?? initialData.filters.defaultDateRange,
+    defaults.playerDashboardFilters?.dateRange ?? initialData?.filters.defaultDateRange,
   );
   const [pitchType, setPitchType] = useState(
-    defaults.playerDashboardFilters?.pitchType ?? initialData.filters.defaultPitchType,
+    defaults.playerDashboardFilters?.pitchType ?? initialData?.filters.defaultPitchType,
   );
   const [pitcherHand, setPitcherHand] = useState("All");
 
-  const isFavorite = favoritePlayers.includes(playerInfo.playerId);
+  const isFavorite = initialData ? favoritePlayers.includes(initialData.playerInfo.playerId) : false;
 
   const filteredPitchDamage = useMemo(() => {
     if (pitchType === "All") return initialData.pitchDamageRows;
@@ -52,8 +52,8 @@ export function PlayerHrDashboardPage({ initialData }: { initialData: PlayerDash
   }, [initialData.hrEvents, pitchType, pitcherHand]);
 
   const handleResetFilters = () => {
-    setDateRange(initialData.filters.defaultDateRange);
-    setPitchType(initialData.filters.defaultPitchType);
+    setDateRange(initialData?.filters.defaultDateRange ?? dateRange);
+    setPitchType(initialData?.filters.defaultPitchType ?? pitchType);
     setPitcherHand("All");
   };
 
@@ -69,7 +69,16 @@ export function PlayerHrDashboardPage({ initialData }: { initialData: PlayerDash
         pitchType,
       },
     }));
-  }, [dateRange, initialData.filters.defaultDateRange, initialData.filters.defaultPitchType, initialData.playerInfo.playerId, pitchType, season, setDefaults, split]);
+  }, [
+    dateRange,
+    initialData.filters.defaultDateRange,
+    initialData.filters.defaultPitchType,
+    initialData.playerInfo.playerId,
+    pitchType,
+    season,
+    setDefaults,
+    split,
+  ]);
 
   return (
     <section className="space-y-5">

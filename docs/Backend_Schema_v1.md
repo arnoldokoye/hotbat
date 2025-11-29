@@ -1,0 +1,172 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Team {
+  id            Int     @id @default(autoincrement())
+  name          String
+  abbrev        String
+  league        String
+  division      String
+  logoUrl       String?
+  primaryParkId Int?
+
+  primaryPark Park? @relation(fields: [primaryParkId], references: [id])
+
+  homeGames        Game[]            @relation("HomeGames")
+  awayGames        Game[]            @relation("AwayGames")
+  teamGameStats    TeamGameHrStats[]
+  teamSummaries    TeamHrSummary[]
+  gamePredictions  GameHrPrediction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Park {
+  id              Int                @id @default(autoincrement())
+  name            String
+  city            String?
+  state           String?
+  country         String?
+  defaultHrFactor Float?
+
+  teams          Team[]
+  games          Game[]
+  teamGameStats  TeamGameHrStats[]
+  parkHrFactors  ParkHrFactor[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Game {
+  id         Int      @id @default(autoincrement())
+  mlbGameId  String?
+  date       DateTime
+  startTime  DateTime?
+  status     String
+  season     Int
+  homeScore  Int?
+  awayScore  Int?
+
+  homeTeamId Int
+  awayTeamId Int
+  parkId     Int
+
+  homeTeam Team @relation("HomeGames", fields: [homeTeamId], references: [id])
+  awayTeam Team @relation("AwayGames", fields: [awayTeamId], references: [id])
+  park     Park @relation(fields: [parkId], references: [id])
+
+  teamGameStats   TeamGameHrStats[]
+  gamePredictions GameHrPrediction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+}
+
+model TeamGameHrStats {
+  id             Int      @id @default(autoincrement())
+  gameId         Int
+  teamId         Int
+  opponentTeamId Int
+  season         Int
+  date           DateTime
+  homeOrAway     String   // "home" | "away" conceptually
+  parkId         Int
+  hr             Int
+  xHr            Float?
+  avgEv          Float?
+  barrels        Int?
+  barrelRate     Float?
+  pa             Int?
+
+  game         Game @relation(fields: [gameId], references: [id])
+  team         Team @relation(fields: [teamId], references: [id])
+  opponentTeam Team @relation("OpponentTeam", fields: [opponentTeamId], references: [id])
+  park         Park @relation(fields: [parkId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId, date])
+  @@index([gameId])
+}
+
+model TeamHrSummary {
+  id             Int      @id @default(autoincrement())
+  teamId         Int
+  season         Int
+  fromDate       DateTime?
+  toDate         DateTime?
+  splitKey       String   // "overall", "home", "away", "vs_lhp", "month:2024-06", etc.
+  gamesPlayed    Int
+  hr             Int
+  xHr            Float?
+  hrPerGame      Float
+  hrPerPa        Float?
+  hrVsLeaguePct  Float?
+  avgEv          Float?
+  barrelRate     Float?
+
+  team Team @relation(fields: [teamId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId, season, splitKey])
+}
+
+model ParkHrFactor {
+  id             Int      @id @default(autoincrement())
+  parkId         Int
+  season         Int
+  hrFactor       Float
+  hrFactorVsLhp  Float?
+  hrFactorVsRhp  Float?
+  samples        Int?
+
+  park Park @relation(fields: [parkId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parkId, season])
+}
+
+model GameHrPrediction {
+  id                   Int      @id @default(autoincrement())
+  gameId               Int
+  teamId               Int
+  modelVersion         String
+  predictionTimestamp  DateTime
+  predictedHrMean      Float
+  predictedHrStd       Float?
+  hotbatScore          Float
+  labelType            String     // e.g. "team_total_hr"
+  featuresSnapshot     Json?
+
+  game Game @relation(fields: [gameId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gameId, teamId])
+}
+
+// Back relation for opponentTeam
+// (Prisma needs this relation name on Team side)
+model Team {
+  // ...existing fields...
+  opponentGameStats TeamGameHrStats[] @relation("OpponentTeam")
+}

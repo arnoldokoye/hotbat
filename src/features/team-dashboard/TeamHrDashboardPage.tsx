@@ -19,26 +19,26 @@ export function TeamHrDashboardPage({ initialData }: TeamHrDashboardPageProps) {
   const { favoriteTeams, toggleTeamFavorite, defaults, setDefaults } = useFavorites();
 
   const [season, setSeason] = useState(
-    defaults.teamDashboardFilters?.season ?? initialData.filters.defaultSeason,
+    defaults.teamDashboardFilters?.season ?? initialData?.filters.defaultSeason,
   );
   const [split, setSplit] = useState(
-    defaults.teamDashboardFilters?.split ?? initialData.filters.defaultSplit,
+    defaults.teamDashboardFilters?.split ?? initialData?.filters.defaultSplit,
   );
-  const [park, setPark] = useState(initialData.filters.defaultPark);
-  const [homeAway, setHomeAway] = useState(initialData.filters.defaultHomeAway);
+  const [park, setPark] = useState(initialData?.filters.defaultPark);
+  const [homeAway, setHomeAway] = useState(initialData?.filters.defaultHomeAway);
 
   const [dateRange, setDateRange] = useState(
-    defaults.teamDashboardFilters?.dateRange ?? initialData.filters.defaultDateRange,
+    defaults.teamDashboardFilters?.dateRange ?? initialData?.filters.defaultDateRange,
   );
-  const [pitcherHand, setPitcherHand] = useState(initialData.filters.defaultPitcherHand);
-  const [minPA, setMinPA] = useState(initialData.filters.defaultMinPa);
+  const [pitcherHand, setPitcherHand] = useState(initialData?.filters.defaultPitcherHand);
+  const [minPA, setMinPA] = useState(initialData?.filters.defaultMinPa);
 
-  const isFavorite = favoriteTeams.includes(initialData.teamInfo.teamId);
+  const isFavorite = initialData ? favoriteTeams.includes(initialData.teamInfo.teamId) : false;
 
   const handleResetFilters = () => {
-    setDateRange(initialData.filters.defaultDateRange);
-    setPitcherHand(initialData.filters.defaultPitcherHand);
-    setMinPA(initialData.filters.defaultMinPa);
+    setDateRange(initialData?.filters.defaultDateRange ?? dateRange);
+    setPitcherHand(initialData?.filters.defaultPitcherHand ?? pitcherHand);
+    setMinPA(initialData?.filters.defaultMinPa ?? minPA);
   };
 
   useEffect(() => {
