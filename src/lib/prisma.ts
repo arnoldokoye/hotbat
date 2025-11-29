@@ -14,7 +14,13 @@ const globalForPrisma = globalThis as unknown as {
   adapter?: PrismaPg;
 };
 
-const pool = globalForPrisma.pool ?? new Pool({ connectionString });
+// Create a Pool with SSL verification enabled; rely on system trust or NODE_EXTRA_CA_CERTS for Supabase CA.
+const pool =
+  globalForPrisma.pool ??
+  new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: true },
+  });
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool);
 
 export const prisma =

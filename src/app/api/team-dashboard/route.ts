@@ -1,33 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-type KeyMetric = {
-  id: string;
-  label: string;
-  value: string;
-  comparisonText?: string;
-  trendDirection?: "up" | "down" | "flat";
-};
-
-type TeamSplitRow = {
-  label: string;
-  hrPerGame: number;
-  leagueAvgHrPerGame?: number;
-};
-
-type GameRow = {
-  id: number;
-  date: string;
-  opponent: string;
-  park: string;
-  result?: string;
-  hr: number;
-  xHr?: number;
-  hrDiff?: number;
-  opposingSp?: string;
-  opposingSpHr9?: number;
-};
-
 type TeamDashboardResponse = {
   teamInfo: {
     id: number;
@@ -37,7 +10,13 @@ type TeamDashboardResponse = {
     division: string;
     logoUrl?: string;
   };
-  keyMetrics: KeyMetric[];
+  keyMetrics: {
+    id: string;
+    label: string;
+    value: string;
+    comparisonText?: string;
+    trendDirection?: "up" | "down" | "flat";
+  }[];
   hrTimeSeries: {
     date: string;
     hr: number;
@@ -65,24 +44,30 @@ type TeamDashboardResponse = {
     hotbatScore?: number;
   }[];
   splits: {
-    overview: TeamSplitRow[];
-    homeAway: TeamSplitRow[];
-    lhpRhp: TeamSplitRow[];
-    monthly: TeamSplitRow[];
+    overview: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    homeAway: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    lhpRhp: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    monthly: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
   };
-  games: GameRow[];
+  games: {
+    id: number;
+    date: string;
+    opponent: string;
+    park: string;
+    result?: string;
+    hr: number;
+    xHr?: number;
+    hrDiff?: number;
+    opposingSp?: string;
+    opposingSpHr9?: number;
+  }[];
 };
 
-const parseDateParam = (value: string | null) => {
+const parseDate = (value: string | null) => {
   if (!value) return undefined;
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
-
-const toSplitRow = (summary: { hrPerGame: number }): TeamSplitRow => ({
-  label: "HR/G",
-  hrPerGame: summary.hrPerGame,
-});
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -108,16 +93,14 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const fromDate = parseDateParam(fromParam);
-  const toDate = parseDateParam(toParam);
-
+  const fromDate = parseDate(fromParam);
+  const toDate = parseDate(toParam);
   if (fromParam && fromDate === null) {
     return NextResponse.json(
       { error: "from must be a valid date (YYYY-MM-DD)" },
       { status: 400 },
     );
   }
-
   if (toParam && toDate === null) {
     return NextResponse.json(
       { error: "to must be a valid date (YYYY-MM-DD)" },
@@ -136,7 +119,6 @@ export async function GET(req: NextRequest) {
       logoUrl: true,
     },
   });
-
   if (!team) {
     return NextResponse.json({ error: "Team not found" }, { status: 404 });
   }
@@ -151,7 +133,7 @@ export async function GET(req: NextRequest) {
         }
       : {};
 
-  const gameStats = await prisma.teamGameHrStats.findMany({
+  const stats = await prisma.teamGameHrStats.findMany({
     where: {
       teamId,
       ...(season ? { season } : {}),
@@ -161,9 +143,7 @@ export async function GET(req: NextRequest) {
     include: {
       opponentTeam: true,
       game: {
-        include: {
-          park: true,
-        },
+        include: { park: true },
       },
     },
   });
@@ -176,77 +156,76 @@ export async function GET(req: NextRequest) {
     orderBy: [{ season: "desc" }, { updatedAt: "desc" }],
   });
 
-  const summaryForSplit =
-    summaries.find((entry) => entry.splitKey === splitParam) ??
-    summaries.find((entry) => entry.splitKey === "overall");
+  const summary =
+    summaries.find((s) => s.splitKey === splitParam) ??
+    summaries.find((s) => s.splitKey === "overall");
 
-  const keyMetrics: KeyMetric[] = summaryForSplit
+  const keyMetrics = summary
     ? [
         {
           id: "hr_per_game",
           label: "HR/Game",
-          value: summaryForSplit.hrPerGame.toFixed(2),
+          value: summary.hrPerGame.toFixed(2),
         },
         {
           id: "games_played",
           label: "Games",
-          value: summaryForSplit.gamesPlayed.toString(),
+          value: summary.gamesPlayed.toString(),
         },
         {
           id: "total_hr",
           label: "Total HR",
-          value: summaryForSplit.hr.toString(),
+          value: summary.hr.toString(),
         },
-        summaryForSplit.hrVsLeaguePct !== null
+        summary.hrVsLeaguePct !== null
           ? {
               id: "hr_vs_league_pct",
               label: "HR vs League %",
-              value: `${summaryForSplit.hrVsLeaguePct.toFixed(1)}%`,
+              value: `${summary.hrVsLeaguePct.toFixed(1)}%`,
             }
           : undefined,
-        summaryForSplit.avgEv !== null
+        summary.avgEv !== null
           ? {
               id: "avg_ev",
               label: "Avg EV",
-              value: summaryForSplit.avgEv.toFixed(1),
+              value: summary.avgEv.toFixed(1),
             }
           : undefined,
-      ].filter(Boolean) as KeyMetric[]
+      ].filter(Boolean)
     : [];
 
-  const hrTimeSeries = gameStats.map((stat) => ({
-    date: stat.date.toISOString(),
-    hr: stat.hr,
-    xHr: stat.xHr ?? undefined,
-    avgEv: stat.avgEv ?? undefined,
-    barrels: stat.barrels ?? undefined,
+  const hrTimeSeries = stats.map((s) => ({
+    date: s.date.toISOString(),
+    hr: s.hr,
+    xHr: s.xHr ?? undefined,
+    avgEv: s.avgEv ?? undefined,
+    barrels: s.barrels ?? undefined,
   }));
 
-  const games: GameRow[] = gameStats.map((stat) => {
-    const game = stat.game;
+  const games = stats.map((s) => {
+    const game = s.game;
     const teamScore =
-      game.homeTeamId === stat.teamId ? game.homeScore : game.awayScore;
+      game.homeTeamId === s.teamId ? game.homeScore : game.awayScore;
     const opponentScore =
-      game.homeTeamId === stat.teamId ? game.awayScore : game.homeScore;
+      game.homeTeamId === s.teamId ? game.awayScore : game.homeScore;
     const result =
       teamScore !== null &&
-      teamScore !== undefined &&
       opponentScore !== null &&
+      teamScore !== undefined &&
       opponentScore !== undefined
         ? `${teamScore > opponentScore ? "W" : "L"} ${teamScore}-${opponentScore}`
         : undefined;
-
     return {
       id: game.id,
       date: game.date.toISOString(),
-      opponent: stat.opponentTeam?.name ?? "Unknown",
+      opponent: s.opponentTeam?.name ?? "Unknown",
       park: game.park.name,
       result,
-      hr: stat.hr,
-      xHr: stat.xHr ?? undefined,
+      hr: s.hr,
+      xHr: s.xHr ?? undefined,
       hrDiff:
-        stat.xHr !== null && stat.xHr !== undefined
-          ? Number((stat.hr - stat.xHr).toFixed(2))
+        s.xHr !== null && s.xHr !== undefined
+          ? Number((s.hr - s.xHr).toFixed(2))
           : undefined,
       opposingSp: undefined,
       opposingSpHr9: undefined,
@@ -254,37 +233,25 @@ export async function GET(req: NextRequest) {
   });
 
   const splits = {
-    overview: summaries
-      .filter((s) => s.splitKey === "overall")
-      .map((s) => ({ ...toSplitRow(s), label: "Overall HR/G" })),
-    homeAway: summaries
-      .filter((s) => s.splitKey === "home" || s.splitKey === "away")
-      .map((s) => ({
-        ...toSplitRow(s),
-        label: s.splitKey === "home" ? "Home HR/G" : "Away HR/G",
-      })),
-    lhpRhp: summaries
-      .filter((s) => s.splitKey === "vs_lhp" || s.splitKey === "vs_rhp")
-      .map((s) => ({
-        ...toSplitRow(s),
-        label: s.splitKey === "vs_lhp" ? "vs LHP HR/G" : "vs RHP HR/G",
-      })),
-    monthly: summaries
-      .filter((s) => s.splitKey.startsWith("month:"))
-      .map((s) => ({
-        ...toSplitRow(s),
-        label: `Month ${s.splitKey.replace("month:", "")} HR/G`,
-      })),
+    overview:
+      summaries
+        .filter((s) => s.splitKey === "overall")
+        .map((s) => ({
+          label: "Overall HR/G",
+          hrPerGame: s.hrPerGame,
+        })) ?? [],
+    homeAway: [],
+    lhpRhp: [],
+    monthly: [],
   };
 
-  const upcomingGamesRaw = await prisma.game.findMany({
+  const upcoming = await prisma.game.findMany({
     where: {
       OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
-      date: { gte: new Date() },
+      status: "scheduled",
       ...(season ? { season } : {}),
     },
     orderBy: { date: "asc" },
-    take: 10,
     include: {
       homeTeam: true,
       awayTeam: true,
@@ -305,28 +272,24 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  const upcomingGames: TeamDashboardResponse["upcomingGames"] =
-    upcomingGamesRaw.map((game) => {
-      const isHome = game.homeTeamId === teamId;
-      const opponent = isHome ? game.awayTeam : game.homeTeam;
-      const parkFactor =
-        game.park.parkHrFactors[0]?.hrFactor ??
-        game.park.defaultHrFactor ??
-        undefined;
-      const prediction = game.gamePredictions[0];
-
-      return {
-        gameId: game.id,
-        date: game.date.toISOString(),
-        opponentName: opponent.name,
-        opponentAbbrev: opponent.abbrev,
-        parkName: game.park.name,
-        parkHrFactor: parkFactor,
-        predictedHrMean: prediction?.predictedHrMean ?? undefined,
-        predictedHrStd: prediction?.predictedHrStd ?? undefined,
-        hotbatScore: prediction?.hotbatScore ?? undefined,
-      };
-    });
+  const upcomingGames = upcoming.map((g) => {
+    const isHome = g.homeTeamId === teamId;
+    const opponent = isHome ? g.awayTeam : g.homeTeam;
+    const prediction = g.gamePredictions[0];
+    const parkFactor =
+      g.park.parkHrFactors[0]?.hrFactor ?? g.park.defaultHrFactor ?? undefined;
+    return {
+      gameId: g.id,
+      date: g.date.toISOString(),
+      opponentName: opponent.name,
+      opponentAbbrev: opponent.abbrev,
+      parkName: g.park.name,
+      parkHrFactor: parkFactor,
+      predictedHrMean: prediction?.predictedHrMean ?? undefined,
+      predictedHrStd: prediction?.predictedHrStd ?? undefined,
+      hotbatScore: prediction?.hotbatScore ?? undefined,
+    };
+  });
 
   const response: TeamDashboardResponse = {
     teamInfo: {

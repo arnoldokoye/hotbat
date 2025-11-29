@@ -1,31 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-type TodayGame = {
-  id: number;
-  date: string;
-  startTimeLocal?: string;
-  homeTeamId: number;
-  awayTeamId: number;
-  homeTeamName: string;
-  awayTeamName: string;
-  homeTeamAbbrev: string;
-  awayTeamAbbrev: string;
-  homeTeamLogoUrl?: string;
-  awayTeamLogoUrl?: string;
-  parkName: string;
-  parkHrFactor?: number;
-  homePredictedHrMean?: number;
-  awayPredictedHrMean?: number;
-  hotbatScore?: number;
-};
-
 type TodayGamesResponse = {
   date: string;
-  games: TodayGame[];
+  games: {
+    id: number;
+    date: string;
+    startTimeLocal?: string;
+    homeTeamId: number;
+    awayTeamId: number;
+    homeTeamName: string;
+    awayTeamName: string;
+    homeTeamAbbrev: string;
+    awayTeamAbbrev: string;
+    homeTeamLogoUrl?: string;
+    awayTeamLogoUrl?: string;
+    parkName: string;
+    parkHrFactor?: number;
+    homePredictedHrMean?: number;
+    awayPredictedHrMean?: number;
+    hotbatScore?: number;
+  }[];
 };
 
-const parseDateParam = (value: string | null) => {
+const parseDate = (value: string | null) => {
   if (!value) return null;
   const parsed = new Date(`${value}T00:00:00.000Z`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
@@ -34,7 +32,7 @@ const parseDateParam = (value: string | null) => {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const dateParam = searchParams.get("date");
-  const date = parseDateParam(dateParam);
+  const date = parseDate(dateParam);
 
   if (!dateParam || !date) {
     return NextResponse.json(
@@ -52,7 +50,14 @@ export async function GET(req: NextRequest) {
     include: {
       homeTeam: true,
       awayTeam: true,
-      park: { include: { parkHrFactors: true } },
+      park: {
+        include: {
+          parkHrFactors: {
+            orderBy: { updatedAt: "desc" },
+            take: 1,
+          },
+        },
+      },
       gamePredictions: true,
     },
   });
@@ -66,9 +71,7 @@ export async function GET(req: NextRequest) {
       const awayPrediction = game.gamePredictions.find(
         (p) => p.teamId === game.awayTeamId,
       );
-      const parkFactorEntry =
-        game.park.parkHrFactors.find((f) => f.season === game.season) ??
-        game.park.parkHrFactors[0];
+      const parkFactorEntry = game.park.parkHrFactors[0];
       const hotbatScore =
         game.gamePredictions.length > 0
           ? game.gamePredictions.reduce(
