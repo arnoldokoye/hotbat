@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { TeamFiltersStrip } from "./components/TeamFiltersStrip";
 import { TeamHeader } from "./components/TeamHeader";
