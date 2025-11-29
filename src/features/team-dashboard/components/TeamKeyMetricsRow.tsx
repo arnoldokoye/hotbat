@@ -1,12 +1,17 @@
+import { Badge } from "@/components/ui/Badge";
+import { Card, CardBody } from "@/components/ui/Card";
 import { TeamKeyMetric } from "../mock/teamDashboardData";
 
 type TeamKeyMetricsRowProps = {
   metrics: TeamKeyMetric[];
 };
 
+/**
+ * TeamKeyMetricsRow renders compact metric cards summarizing key HR stats.
+ */
 export function TeamKeyMetricsRow({ metrics }: TeamKeyMetricsRowProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {metrics.map((metric) => (
         <MetricCard key={metric.id} metric={metric} />
       ))}
@@ -31,19 +36,23 @@ function MetricCard({ metric }: MetricCardProps) {
       : "text-slate-500";
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </p>
-      <div className="mt-2 flex items-baseline gap-2">
-        <p className="text-2xl font-semibold text-slate-900">{value}</p>
-        {trendValue && (
-          <span className={`text-xs font-semibold ${trendColor}`}>
-            {trendSymbol} {trendValue}
-          </span>
-        )}
-      </div>
-      <p className="mt-1 text-sm text-slate-600">{comparisonText}</p>
-    </div>
+    <Card>
+      <CardBody className="px-4 py-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          {label}
+        </p>
+        <div className="mt-2 flex items-baseline gap-2">
+          <p className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+            {value}
+          </p>
+          {trendValue && (
+            <Badge className={`${trendColor} bg-transparent px-2 py-1`}>
+              {trendSymbol} {trendValue}
+            </Badge>
+          )}
+        </div>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{comparisonText}</p>
+      </CardBody>
+    </Card>
   );
 }

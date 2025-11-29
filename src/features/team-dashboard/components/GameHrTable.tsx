@@ -1,16 +1,24 @@
-"use client";
+﻿"use client";
+
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Select";
+import { Table, Tbody, Td, Th, Thead, Tr } from "@/components/ui/Table";
 import { GameRow } from "../mock/teamDashboardData";
 
 type SortKey = keyof Pick<
   GameRow,
-  "date" | "opponent" | "park" | "hr" | "xHr" | "hrDiff" | "opposingSp" | "opposingSpHr9"
+  "date" | "opponent" | "park" | "result" | "hr" | "xHr" | "hrDiff" | "opposingSp" | "opposingSpHr9"
 >;
 
 type GameHrTableProps = {
   rows: GameRow[];
 };
 
+/**
+ * GameHrTable renders a sortable, filterable table of game-level HR data.
+ */
 export function GameHrTable({ rows }: GameHrTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortKey>("date");
@@ -61,13 +69,15 @@ export function GameHrTable({ rows }: GameHrTableProps) {
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <Card>
+      <CardHeader>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Game-Level HR View
           </p>
-          <p className="text-sm text-slate-600">Search, sort, and page through recent games</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Search, sort, and page through recent games
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -78,21 +88,18 @@ export function GameHrTable({ rows }: GameHrTableProps) {
               setPage(1);
             }}
             placeholder="Search opponent or park"
-            className="h-10 w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 shadow-sm transition hover:border-slate-300 focus:border-slate-400 focus:outline-none"
+            className="h-10 w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 shadow-sm transition hover:border-slate-300 focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
           />
-          <button
-            type="button"
-            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300"
-          >
+          <Button type="button" size="sm" variant="secondary">
             Columns
-          </button>
+          </Button>
         </div>
-      </div>
+      </CardHeader>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <CardBody>
+        <Table>
+          <Thead>
+            <Tr>
               {[
                 { key: "date", label: "Date" },
                 { key: "opponent", label: "Opponent" },
@@ -104,11 +111,11 @@ export function GameHrTable({ rows }: GameHrTableProps) {
                 { key: "opposingSp", label: "Opposing SP" },
                 { key: "opposingSpHr9", label: "SP HR/9" },
               ].map(({ key, label }) => (
-                <th key={key} className="px-3 py-2">
+                <Th key={key}>
                   <button
                     type="button"
                     onClick={() => handleSort(key as SortKey)}
-                    className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                    className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300"
                   >
                     {label}
                     {sortBy === key ? (
@@ -119,68 +126,72 @@ export function GameHrTable({ rows }: GameHrTableProps) {
                       <span aria-hidden className="text-[10px] text-slate-300">▲</span>
                     )}
                   </button>
-                </th>
+                </Th>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </Tr>
+          </Thead>
+          <Tbody>
             {pageRows.map((row) => (
-              <tr key={row.id} className="border-b border-slate-100 last:border-0">
-                <td className="px-3 py-2 text-slate-800">{row.date}</td>
-                <td className="px-3 py-2 font-semibold text-slate-900">{row.opponent}</td>
-                <td className="px-3 py-2 text-slate-700">{row.park}</td>
-                <td className="px-3 py-2 text-slate-700">{row.result}</td>
-                <td className="px-3 py-2 text-slate-900">{row.hr.toFixed(0)}</td>
-                <td className="px-3 py-2 text-slate-700">{row.xHr.toFixed(1)}</td>
-                <td className="px-3 py-2 text-slate-700">{row.hrDiff.toFixed(1)}</td>
-                <td className="px-3 py-2 text-slate-700">{row.opposingSp}</td>
-                <td className="px-3 py-2 text-slate-700">{row.opposingSpHr9.toFixed(2)}</td>
-              </tr>
+              <Tr key={row.id}>
+                <Td className="text-slate-800 dark:text-slate-200">{row.date}</Td>
+                <Td className="font-semibold text-slate-900 dark:text-slate-50">{row.opponent}</Td>
+                <Td className="text-slate-700 dark:text-slate-200">{row.park}</Td>
+                <Td className="text-slate-700 dark:text-slate-200">{row.result}</Td>
+                <Td className="text-slate-900 dark:text-slate-50">{row.hr.toFixed(0)}</Td>
+                <Td className="text-slate-700 dark:text-slate-200">{row.xHr.toFixed(1)}</Td>
+                <Td className="text-slate-700 dark:text-slate-200">{row.hrDiff.toFixed(1)}</Td>
+                <Td className="text-slate-700 dark:text-slate-200">{row.opposingSp}</Td>
+                <Td className="text-slate-700 dark:text-slate-200">
+                  {row.opposingSpHr9.toFixed(2)}
+                </Td>
+              </Tr>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </CardBody>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-700">
+      <CardBody className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-700 dark:text-slate-300">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Rows per page</span>
-          <select
+          <span className="text-xs text-slate-500 dark:text-slate-400">Rows per page</span>
+          <Select
             value={pageSize}
             onChange={(event) => {
               setPageSize(Number(event.target.value));
               setPage(1);
             }}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 focus:border-slate-400 focus:outline-none"
+            className="h-9 w-20"
           >
             {[10, 15, 20].map((size) => (
               <option key={size} value={size}>
                 {size}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex items-center gap-3">
-          <button
+          <Button
             type="button"
             onClick={() => handlePageChange("prev")}
             disabled={currentPage === 1}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+            variant="secondary"
+            size="sm"
           >
             Prev
-          </button>
-          <span className="text-xs font-medium text-slate-600">
+          </Button>
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
             Page {currentPage} of {totalPages}
           </span>
-          <button
+          <Button
             type="button"
             onClick={() => handlePageChange("next")}
             disabled={currentPage === totalPages}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+            variant="secondary"
+            size="sm"
           >
             Next
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 }

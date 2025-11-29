@@ -1,4 +1,9 @@
+"use client";
 import Image from "next/image";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Select";
 import { TeamInfo } from "../mock/teamDashboardData";
 
 type TeamHeaderProps = {
@@ -20,6 +25,9 @@ const splitOptions = ["Full Season", "Last 30 Days", "Last 14 Days", "Post-ASB"]
 const parkOptions = ["All Parks", "Yankee Stadium", "Fenway Park", "Camden Yards"];
 const homeAwayOptions = ["All Games", "Home", "Away"];
 
+/**
+ * TeamHeader displays core team identity and quick selector controls.
+ */
 export function TeamHeader({
   teamInfo,
   season,
@@ -34,91 +42,91 @@ export function TeamHeader({
   onToggleFavorite,
 }: TeamHeaderProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-slate-900 text-sm font-semibold text-white">
-            <Image
-              src={teamInfo.teamLogoUrl}
-              alt={teamInfo.teamName}
-              width={48}
-              height={48}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold text-slate-900">
-                {teamInfo.teamName}
-              </h1>
-              <button
-                type="button"
-                onClick={onToggleFavorite}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-amber-500 shadow-sm transition hover:border-amber-300 hover:bg-amber-50"
-                aria-label={isFavorite ? "Remove from favorites" : "Save as favorite"}
-              >
-                {isFavorite ? "★" : "☆"}
-              </button>
+    <Card>
+      <CardHeader className="border-none px-6 pb-1 pt-6 md:pb-3">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-slate-900 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">
+              <Image
+                src={teamInfo.teamLogoUrl}
+                alt={teamInfo.teamName}
+                width={48}
+                height={48}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <p className="text-sm text-slate-600">
-              {teamInfo.league} · {teamInfo.division}
-            </p>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+                  {teamInfo.teamName}
+                </h1>
+                <Badge variant="success">Trending</Badge>
+                <Button
+                  type="button"
+                  onClick={onToggleFavorite}
+                  variant="icon"
+                  size="sm"
+                  className="h-9 w-9 rounded-full text-lg text-amber-500"
+                  aria-label={isFavorite ? "Remove from favorites" : "Save as favorite"}
+                >
+                  {isFavorite ? "★" : "☆"}
+                </Button>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {teamInfo.league} · {teamInfo.division}
+              </p>
+            </div>
           </div>
         </div>
-
-        <div className="grid w-full gap-3 sm:grid-cols-2 md:w-auto md:grid-cols-4">
+      </CardHeader>
+      <CardBody className="px-6 pb-6">
+        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Select
             label="Season"
             value={season}
-            onChange={(value) => onSeasonChange(value)}
-            options={seasonOptions}
-          />
+            onChange={(event) => onSeasonChange(event.target.value)}
+          >
+            {seasonOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </Select>
           <Select
             label="Split"
             value={split}
-            onChange={(value) => onSplitChange(value)}
-            options={splitOptions}
-          />
+            onChange={(event) => onSplitChange(event.target.value)}
+          >
+            {splitOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </Select>
           <Select
             label="Park"
             value={park}
-            onChange={(value) => onParkChange(value)}
-            options={parkOptions}
-          />
+            onChange={(event) => onParkChange(event.target.value)}
+          >
+            {parkOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </Select>
           <Select
             label="Home/Away"
             value={homeAway}
-            onChange={(value) => onHomeAwayChange(value)}
-            options={homeAwayOptions}
-          />
+            onChange={(event) => onHomeAwayChange(event.target.value)}
+          >
+            {homeAwayOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </Select>
         </div>
-      </div>
-    </div>
-  );
-}
-
-type SelectProps = {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
-};
-
-function Select({ label, value, options, onChange }: SelectProps) {
-  return (
-    <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-      <span className="text-xs text-slate-500">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 focus:border-slate-400 focus:outline-none"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+      </CardBody>
+    </Card>
   );
 }
