@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFavorites } from "@/context/FavoritesContext";
 import { TeamFiltersStrip } from "./components/TeamFiltersStrip";
 import { TeamHeader } from "./components/TeamHeader";
 import { TeamKeyMetricsRow } from "./components/TeamKeyMetricsRow";
@@ -29,21 +30,39 @@ import {
 } from "./mock/teamDashboardData";
 
 export function TeamHrDashboardPage() {
-  const [season, setSeason] = useState(defaultSeason);
-  const [split, setSplit] = useState(defaultSplit);
+  const { favoriteTeams, toggleTeamFavorite, defaults, setDefaults } = useFavorites();
+
+  const [season, setSeason] = useState(defaults.teamDashboardFilters?.season ?? defaultSeason);
+  const [split, setSplit] = useState(defaults.teamDashboardFilters?.split ?? defaultSplit);
   const [park, setPark] = useState(defaultPark);
   const [homeAway, setHomeAway] = useState(defaultHomeAway);
-  const [isFavorite, setIsFavorite] = useState(false);
 
-  const [dateRange, setDateRange] = useState(defaultDateRange);
+  const [dateRange, setDateRange] = useState(
+    defaults.teamDashboardFilters?.dateRange ?? defaultDateRange,
+  );
   const [pitcherHand, setPitcherHand] = useState(defaultPitcherHand);
   const [minPA, setMinPA] = useState(defaultMinPa);
+
+  const isFavorite = favoriteTeams.includes(teamInfo.teamId);
 
   const handleResetFilters = () => {
     setDateRange(defaultDateRange);
     setPitcherHand(defaultPitcherHand);
     setMinPA(defaultMinPa);
   };
+
+  useEffect(() => {
+    setDefaults((prev) => ({
+      ...prev,
+      teamId: teamInfo.teamId,
+      teamDashboardFilters: {
+        ...prev.teamDashboardFilters,
+        season,
+        split,
+        dateRange,
+      },
+    }));
+  }, [dateRange, season, setDefaults, split]);
 
   return (
     <section className="space-y-5">
@@ -58,7 +77,7 @@ export function TeamHrDashboardPage() {
         homeAway={homeAway}
         onHomeAwayChange={setHomeAway}
         isFavorite={isFavorite}
-        onToggleFavorite={() => setIsFavorite((prev) => !prev)}
+        onToggleFavorite={() => toggleTeamFavorite(teamInfo.teamId)}
       />
 
       <TeamFiltersStrip

@@ -13,6 +13,8 @@ type PlayerHeaderProps = {
   onSeasonChange: (value: string) => void;
   split: string;
   onSplitChange: (value: string) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 };
 
 const seasonOptions = ["2025", "2024", "2023", "Career"];
@@ -27,6 +29,8 @@ export function PlayerHeader({
   onSeasonChange,
   split,
   onSplitChange,
+  isFavorite,
+  onToggleFavorite,
 }: PlayerHeaderProps) {
   const initials = playerInfo.name
     .split(" ")
@@ -62,6 +66,11 @@ export function PlayerHeader({
                 <Badge variant="default">
                   B/T: {playerInfo.bats}/{playerInfo.throws}
                 </Badge>
+                {isFavorite ? (
+                  <Badge variant="default" className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-100">
+                    Favorited
+                  </Badge>
+                ) : null}
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {playerInfo.teamName}
@@ -69,11 +78,8 @@ export function PlayerHeader({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm">
-              Follow
-            </Button>
-            <Button variant="primary" size="sm">
-              Favorite
+            <Button variant="secondary" size="sm" onClick={onToggleFavorite}>
+              {isFavorite ? "Unfavorite" : "Favorite"}
             </Button>
           </div>
         </div>

@@ -66,11 +66,18 @@ export function TeamHeader({
                   onClick={onToggleFavorite}
                   variant="icon"
                   size="sm"
-                  className="h-9 w-9 rounded-full text-lg text-amber-500"
+                  className={`h-9 w-9 rounded-full text-lg ${
+                    isFavorite ? "text-amber-500" : "text-slate-400"
+                  }`}
                   aria-label={isFavorite ? "Remove from favorites" : "Save as favorite"}
                 >
                   {isFavorite ? "★" : "☆"}
                 </Button>
+                {isFavorite ? (
+                  <Badge variant="default" className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-100">
+                    Favorited
+                  </Badge>
+                ) : null}
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {teamInfo.league} · {teamInfo.division}

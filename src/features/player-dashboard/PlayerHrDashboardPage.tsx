@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFavorites } from "@/context/FavoritesContext";
 import { PlayerFiltersStrip } from "./components/PlayerFiltersStrip";
 import { PlayerGameLogTable } from "./components/PlayerGameLogTable";
 import { PlayerHeader } from "./components/PlayerHeader";
@@ -33,11 +34,21 @@ import {
  * PlayerHrDashboardPage renders the player-focused HR dashboard with mock data.
  */
 export function PlayerHrDashboardPage() {
-  const [season, setSeason] = useState(defaultSeason);
-  const [split, setSplit] = useState(defaultSplit);
-  const [dateRange, setDateRange] = useState(defaultDateRange);
-  const [pitchType, setPitchType] = useState(defaultPitchType);
+  const { favoritePlayers, togglePlayerFavorite, defaults, setDefaults } = useFavorites();
+
+  const [season, setSeason] = useState(
+    defaults.playerDashboardFilters?.season ?? defaultSeason,
+  );
+  const [split, setSplit] = useState(defaults.playerDashboardFilters?.split ?? defaultSplit);
+  const [dateRange, setDateRange] = useState(
+    defaults.playerDashboardFilters?.dateRange ?? defaultDateRange,
+  );
+  const [pitchType, setPitchType] = useState(
+    defaults.playerDashboardFilters?.pitchType ?? defaultPitchType,
+  );
   const [pitcherHand, setPitcherHand] = useState(defaultPitcherHand);
+
+  const isFavorite = favoritePlayers.includes(playerInfo.playerId);
 
   const filteredPitchDamage = useMemo(() => {
     if (pitchType === "All") return pitchDamageRows;
@@ -61,6 +72,20 @@ export function PlayerHrDashboardPage() {
     setPitcherHand(defaultPitcherHand);
   };
 
+  useEffect(() => {
+    setDefaults((prev) => ({
+      ...prev,
+      playerId: playerInfo.playerId,
+      playerDashboardFilters: {
+        ...prev.playerDashboardFilters,
+        season,
+        split,
+        dateRange,
+        pitchType,
+      },
+    }));
+  }, [dateRange, pitchType, season, setDefaults, split]);
+
   return (
     <section className="space-y-5">
       <PlayerHeader
@@ -69,6 +94,8 @@ export function PlayerHrDashboardPage() {
         onSeasonChange={setSeason}
         split={split}
         onSplitChange={setSplit}
+        isFavorite={isFavorite}
+        onToggleFavorite={() => togglePlayerFavorite(playerInfo.playerId)}
       />
 
       <PlayerFiltersStrip
