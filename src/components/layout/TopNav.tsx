@@ -129,14 +129,25 @@ export function TopNav() {
                   </p>
                   <ul className="mt-2 space-y-1">
                     {section.links.map((link) => (
-                      <li key={link}>
-                        <button
-                          type="button"
-                          className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-800"
-                        >
-                          <span>{link}</span>
-                          <span className="text-[10px] text-slate-500">→</span>
-                        </button>
+                      <li key={link.label}>
+                        {link.href ? (
+                          <Link
+                            href={link.href}
+                            className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-800"
+                            onClick={() => setIsMobileNavOpen(false)}
+                          >
+                            <span>{link.label}</span>
+                            <span className="text-[10px] text-slate-500">→</span>
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-800"
+                          >
+                            <span>{link.label}</span>
+                            <span className="text-[10px] text-slate-500">→</span>
+                          </button>
+                        )}
                       </li>
                     ))}
                   </ul>

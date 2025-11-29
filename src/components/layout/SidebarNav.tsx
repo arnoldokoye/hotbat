@@ -1,19 +1,40 @@
-export const navSections = [
+import Link from "next/link";
+
+type NavLink = { label: string; href?: string };
+
+export const navSections: { title: string; links: NavLink[] } = [
   {
     title: "Teams",
-    links: ["Dashboards", "Trends", "Comparisons"],
+    links: [
+      { label: "Dashboards", href: "/team" },
+      { label: "Trends" },
+      { label: "Comparisons" },
+    ],
   },
   {
     title: "Today’s Games",
-    links: ["Matchups", "Weather", "Ballpark Factors"],
+    links: [
+      { label: "Matchups" },
+      { label: "Weather" },
+      { label: "Ballpark Factors" },
+    ],
   },
   {
     title: "Players",
-    links: ["Leaderboards", "Projections", "Alerts"],
+    links: [
+      { label: "Player HR Dashboard", href: "/player" },
+      { label: "Leaderboards" },
+      { label: "Projections" },
+      { label: "Alerts" },
+    ],
   },
   {
     title: "Tools",
-    links: ["Custom Reports", "Export", "Settings"],
+    links: [
+      { label: "Custom Reports" },
+      { label: "Export" },
+      { label: "Settings" },
+    ],
   },
 ];
 
@@ -28,14 +49,24 @@ export function SidebarNav() {
             </p>
             <ul className="mt-2 space-y-1">
               {section.links.map((link) => (
-                <li key={link}>
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <span>{link}</span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500">→</span>
-                  </button>
+                <li key={link.label}>
+                  {link.href ? (
+                    <Link
+                      href={link.href}
+                      className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <span>{link.label}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">→</span>
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <span>{link.label}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">→</span>
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
