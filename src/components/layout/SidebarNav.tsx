@@ -14,6 +14,7 @@ export const navSections: { title: string; links: NavLink[] } = [
   {
     title: "Today’s Games",
     links: [
+      { label: "Today’s Games", href: "/today" },
       { label: "Matchups" },
       { label: "Weather" },
       { label: "Ballpark Factors" },
