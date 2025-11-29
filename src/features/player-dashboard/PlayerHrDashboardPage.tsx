@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { PlayerDashboardData } from "@/lib/api/playerDashboard";
 import { useFavorites } from "@/context/FavoritesContext";
 import { PlayerFiltersStrip } from "./components/PlayerFiltersStrip";
 import { PlayerGameLogTable } from "./components/PlayerGameLogTable";
@@ -11,52 +12,36 @@ import { PlayerKeyMetricsRow } from "./components/PlayerKeyMetricsRow";
 import { PlayerParkProfileCard } from "./components/PlayerParkProfileCard";
 import { PlayerPitchDamageCard } from "./components/PlayerPitchDamageCard";
 import { PlayerSplitsCard } from "./components/PlayerSplitsCard";
-import {
-  defaultDateRange,
-  defaultPitchType,
-  defaultPitcherHand,
-  defaultSeason,
-  defaultSplit,
-  parkProfileRows,
-  pitchDamageRows,
-  playerGameLogRows,
-  playerHrEventRows,
-  playerHrTimeSeries,
-  playerInfo,
-  playerKeyMetrics,
-  playerSplitsHomeAway,
-  playerSplitsLhpRhp,
-  playerSplitsMonthly,
-  playerSplitsOverview,
-} from "./mock/playerDashboardData";
 
 /**
  * PlayerHrDashboardPage renders the player-focused HR dashboard with mock data.
  */
-export function PlayerHrDashboardPage() {
+export function PlayerHrDashboardPage({ initialData }: { initialData: PlayerDashboardData }) {
   const { favoritePlayers, togglePlayerFavorite, defaults, setDefaults } = useFavorites();
 
   const [season, setSeason] = useState(
-    defaults.playerDashboardFilters?.season ?? defaultSeason,
+    defaults.playerDashboardFilters?.season ?? initialData.filters.defaultSeason,
   );
-  const [split, setSplit] = useState(defaults.playerDashboardFilters?.split ?? defaultSplit);
+  const [split, setSplit] = useState(
+    defaults.playerDashboardFilters?.split ?? initialData.filters.defaultSplit,
+  );
   const [dateRange, setDateRange] = useState(
-    defaults.playerDashboardFilters?.dateRange ?? defaultDateRange,
+    defaults.playerDashboardFilters?.dateRange ?? initialData.filters.defaultDateRange,
   );
   const [pitchType, setPitchType] = useState(
-    defaults.playerDashboardFilters?.pitchType ?? defaultPitchType,
+    defaults.playerDashboardFilters?.pitchType ?? initialData.filters.defaultPitchType,
   );
-  const [pitcherHand, setPitcherHand] = useState(defaultPitcherHand);
+  const [pitcherHand, setPitcherHand] = useState("All");
 
   const isFavorite = favoritePlayers.includes(playerInfo.playerId);
 
   const filteredPitchDamage = useMemo(() => {
-    if (pitchType === "All") return pitchDamageRows;
-    return pitchDamageRows.filter((row) => row.pitchType === pitchType);
-  }, [pitchType]);
+    if (pitchType === "All") return initialData.pitchDamageRows;
+    return initialData.pitchDamageRows.filter((row) => row.pitchType === pitchType);
+  }, [initialData.pitchDamageRows, pitchType]);
 
   const filteredHrEvents = useMemo(() => {
-    let rows = playerHrEventRows;
+    let rows = initialData.hrEvents;
     if (pitcherHand !== "All") {
       rows = rows.filter((row) => row.pitcherHand === (pitcherHand === "vs LHP" ? "L" : "R"));
     }
@@ -64,18 +49,18 @@ export function PlayerHrDashboardPage() {
       rows = rows.filter((row) => row.pitchType === pitchType);
     }
     return rows;
-  }, [pitchType, pitcherHand]);
+  }, [initialData.hrEvents, pitchType, pitcherHand]);
 
   const handleResetFilters = () => {
-    setDateRange(defaultDateRange);
-    setPitchType(defaultPitchType);
-    setPitcherHand(defaultPitcherHand);
+    setDateRange(initialData.filters.defaultDateRange);
+    setPitchType(initialData.filters.defaultPitchType);
+    setPitcherHand("All");
   };
 
   useEffect(() => {
     setDefaults((prev) => ({
       ...prev,
-      playerId: playerInfo.playerId,
+      playerId: initialData.playerInfo.playerId,
       playerDashboardFilters: {
         ...prev.playerDashboardFilters,
         season,
@@ -84,18 +69,18 @@ export function PlayerHrDashboardPage() {
         pitchType,
       },
     }));
-  }, [dateRange, pitchType, season, setDefaults, split]);
+  }, [dateRange, initialData.filters.defaultDateRange, initialData.filters.defaultPitchType, initialData.playerInfo.playerId, pitchType, season, setDefaults, split]);
 
   return (
     <section className="space-y-5">
       <PlayerHeader
-        playerInfo={playerInfo}
+        playerInfo={initialData.playerInfo}
         season={season}
         onSeasonChange={setSeason}
         split={split}
         onSplitChange={setSplit}
         isFavorite={isFavorite}
-        onToggleFavorite={() => togglePlayerFavorite(playerInfo.playerId)}
+        onToggleFavorite={() => togglePlayerFavorite(initialData.playerInfo.playerId)}
       />
 
       <PlayerFiltersStrip
@@ -108,25 +93,25 @@ export function PlayerHrDashboardPage() {
         onResetFilters={handleResetFilters}
       />
 
-      <PlayerKeyMetricsRow metrics={playerKeyMetrics} />
+      <PlayerKeyMetricsRow metrics={initialData.playerKeyMetrics} />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <PlayerHrTrendCard data={playerHrTimeSeries} />
+        <PlayerHrTrendCard data={initialData.playerHrTimeSeries} />
         <PlayerPitchDamageCard rows={filteredPitchDamage} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <PlayerParkProfileCard rows={parkProfileRows} />
+        <PlayerParkProfileCard rows={initialData.parkProfileRows} />
         <PlayerSplitsCard
-          overview={playerSplitsOverview}
-          homeAway={playerSplitsHomeAway}
-          lhpRhp={playerSplitsLhpRhp}
-          monthly={playerSplitsMonthly}
+          overview={initialData.splits.overview}
+          homeAway={initialData.splits.homeAway}
+          lhpRhp={initialData.splits.lhpRhp}
+          monthly={initialData.splits.monthly}
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <PlayerGameLogTable rows={playerGameLogRows} />
+        <PlayerGameLogTable rows={initialData.gameLog} />
         <PlayerHrEventsTable rows={filteredHrEvents} />
       </div>
     </section>

@@ -1,26 +1,28 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { TodayGamesData } from "@/lib/api/todayGames";
 import { useFavorites } from "@/context/FavoritesContext";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { TodayGamesHeader } from "./components/TodayGamesHeader";
 import { TodayGamesList } from "./components/TodayGamesList";
 import { TodayGamesSummaryBar } from "./components/TodayGamesSummaryBar";
-import { defaultDate, todayGames } from "./mock/todayGamesData";
 
 /**
  * TodayGamesPage renders HR-focused context for today’s matchups.
  */
-export function TodayGamesPage() {
+export function TodayGamesPage({ initialData }: { initialData: TodayGamesData }) {
   const { defaults, setDefaults } = useFavorites();
 
-  const [selectedDate, setSelectedDate] = useState(defaults.todayGamesDate ?? defaultDate);
+  const [selectedDate, setSelectedDate] = useState(
+    defaults.todayGamesDate ?? initialData.date,
+  );
   const [teamQuery, setTeamQuery] = useState("");
   const [minHotBatScore, setMinHotBatScore] = useState(0);
   const [minParkHrFactor, setMinParkHrFactor] = useState(0);
 
   const filteredGames = useMemo(() => {
-    return todayGames
+    return initialData.games
       .filter((game) => game.date === selectedDate)
       .filter((game) =>
         teamQuery
@@ -29,7 +31,7 @@ export function TodayGamesPage() {
       )
       .filter((game) => game.hotBatScore >= minHotBatScore)
       .filter((game) => game.parkHrFactor >= minParkHrFactor);
-  }, [selectedDate, teamQuery, minHotBatScore, minParkHrFactor]);
+  }, [initialData.games, minHotBatScore, minParkHrFactor, selectedDate, teamQuery]);
 
   useEffect(() => {
     setDefaults((prev) => ({

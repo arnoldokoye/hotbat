@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import type { TeamDashboardData } from "@/lib/api/teamDashboard";
 import { useFavorites } from "@/context/FavoritesContext";
 import { TeamFiltersStrip } from "./components/TeamFiltersStrip";
 import { TeamHeader } from "./components/TeamHeader";
@@ -9,52 +10,41 @@ import { PitcherHrVulnerabilityCard } from "./components/PitcherHrVulnerabilityC
 import { TeamHrTrendCard } from "./components/TeamHrTrendCard";
 import { TeamSplitsCard } from "./components/TeamSplitsCard";
 import { UpcomingGamesCard } from "./components/UpcomingGamesCard";
-import {
-  defaultDateRange,
-  defaultHomeAway,
-  defaultMinPa,
-  defaultPark,
-  defaultPitcherHand,
-  defaultSeason,
-  defaultSplit,
-  gameRows,
-  pitcherRows,
-  teamInfo,
-  teamHrTimeSeries,
-  teamKeyMetrics,
-  teamSplitsHomeAway,
-  teamSplitsLhpRhp,
-  teamSplitsMonthly,
-  teamSplitsOverview,
-  upcomingGames,
-} from "./mock/teamDashboardData";
 
-export function TeamHrDashboardPage() {
+type TeamHrDashboardPageProps = {
+  initialData: TeamDashboardData;
+};
+
+export function TeamHrDashboardPage({ initialData }: TeamHrDashboardPageProps) {
   const { favoriteTeams, toggleTeamFavorite, defaults, setDefaults } = useFavorites();
 
-  const [season, setSeason] = useState(defaults.teamDashboardFilters?.season ?? defaultSeason);
-  const [split, setSplit] = useState(defaults.teamDashboardFilters?.split ?? defaultSplit);
-  const [park, setPark] = useState(defaultPark);
-  const [homeAway, setHomeAway] = useState(defaultHomeAway);
+  const [season, setSeason] = useState(
+    defaults.teamDashboardFilters?.season ?? initialData.filters.defaultSeason,
+  );
+  const [split, setSplit] = useState(
+    defaults.teamDashboardFilters?.split ?? initialData.filters.defaultSplit,
+  );
+  const [park, setPark] = useState(initialData.filters.defaultPark);
+  const [homeAway, setHomeAway] = useState(initialData.filters.defaultHomeAway);
 
   const [dateRange, setDateRange] = useState(
-    defaults.teamDashboardFilters?.dateRange ?? defaultDateRange,
+    defaults.teamDashboardFilters?.dateRange ?? initialData.filters.defaultDateRange,
   );
-  const [pitcherHand, setPitcherHand] = useState(defaultPitcherHand);
-  const [minPA, setMinPA] = useState(defaultMinPa);
+  const [pitcherHand, setPitcherHand] = useState(initialData.filters.defaultPitcherHand);
+  const [minPA, setMinPA] = useState(initialData.filters.defaultMinPa);
 
-  const isFavorite = favoriteTeams.includes(teamInfo.teamId);
+  const isFavorite = favoriteTeams.includes(initialData.teamInfo.teamId);
 
   const handleResetFilters = () => {
-    setDateRange(defaultDateRange);
-    setPitcherHand(defaultPitcherHand);
-    setMinPA(defaultMinPa);
+    setDateRange(initialData.filters.defaultDateRange);
+    setPitcherHand(initialData.filters.defaultPitcherHand);
+    setMinPA(initialData.filters.defaultMinPa);
   };
 
   useEffect(() => {
     setDefaults((prev) => ({
       ...prev,
-      teamId: teamInfo.teamId,
+      teamId: initialData.teamInfo.teamId,
       teamDashboardFilters: {
         ...prev.teamDashboardFilters,
         season,
@@ -62,12 +52,12 @@ export function TeamHrDashboardPage() {
         dateRange,
       },
     }));
-  }, [dateRange, season, setDefaults, split]);
+  }, [dateRange, initialData.teamInfo.teamId, season, setDefaults, split]);
 
   return (
     <section className="space-y-5">
       <TeamHeader
-        teamInfo={teamInfo}
+        teamInfo={initialData.teamInfo}
         season={season}
         onSeasonChange={setSeason}
         split={split}
@@ -77,7 +67,7 @@ export function TeamHrDashboardPage() {
         homeAway={homeAway}
         onHomeAwayChange={setHomeAway}
         isFavorite={isFavorite}
-        onToggleFavorite={() => toggleTeamFavorite(teamInfo.teamId)}
+        onToggleFavorite={() => toggleTeamFavorite(initialData.teamInfo.teamId)}
       />
 
       <TeamFiltersStrip
@@ -90,24 +80,27 @@ export function TeamHrDashboardPage() {
         onResetFilters={handleResetFilters}
       />
 
-      <TeamKeyMetricsRow metrics={teamKeyMetrics} />
+      <TeamKeyMetricsRow metrics={initialData.teamKeyMetrics} />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <TeamHrTrendCard data={teamHrTimeSeries} />
-        <PitcherHrVulnerabilityCard rows={pitcherRows} teamName={teamInfo.teamName} />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <UpcomingGamesCard games={upcomingGames} />
-        <TeamSplitsCard
-          overview={teamSplitsOverview}
-          homeAway={teamSplitsHomeAway}
-          lhpRhp={teamSplitsLhpRhp}
-          monthly={teamSplitsMonthly}
+        <TeamHrTrendCard data={initialData.teamHrTimeSeries} />
+        <PitcherHrVulnerabilityCard
+          rows={initialData.pitcherRows}
+          teamName={initialData.teamInfo.teamName}
         />
       </div>
 
-      <GameHrTable rows={gameRows} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <UpcomingGamesCard games={initialData.upcomingGames} />
+        <TeamSplitsCard
+          overview={initialData.splits.overview}
+          homeAway={initialData.splits.homeAway}
+          lhpRhp={initialData.splits.lhpRhp}
+          monthly={initialData.splits.monthly}
+        />
+      </div>
+
+      <GameHrTable rows={initialData.gameRows} />
     </section>
   );
 }

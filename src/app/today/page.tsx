@@ -1,5 +1,7 @@
 import { TodayGamesPage } from "@/features/today-games/TodayGamesPage";
+import { fetchTodayGames } from "@/lib/api/todayGames";
 
-export default function TodayPage() {
-  return <TodayGamesPage />;
+export default async function TodayPage() {
+  const data = await fetchTodayGames();
+  return <TodayGamesPage initialData={data} />;
 }
