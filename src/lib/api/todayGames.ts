@@ -1,16 +1,40 @@
-import { defaultDate, todayGames } from "@/features/today-games/mock/todayGamesData";
 import { simulateNetworkLatency } from "./utils";
 
-export type TodayGamesData = {
+// Types aligned with docs/Backend_API_Contracts.md
+export type TodayGamesResponse = {
   date: string;
-  games: typeof todayGames;
+  games: {
+    id: number;
+    date: string;
+    startTimeLocal?: string;
+    homeTeamId: number;
+    awayTeamId: number;
+    homeTeamName: string;
+    awayTeamName: string;
+    homeTeamAbbrev: string;
+    awayTeamAbbrev: string;
+    homeTeamLogoUrl?: string;
+    awayTeamLogoUrl?: string;
+    parkName: string;
+    parkHrFactor?: number;
+    homePredictedHrMean?: number;
+    awayPredictedHrMean?: number;
+    hotbatScore?: number;
+  }[];
 };
 
-export async function fetchTodayGames(date?: string): Promise<TodayGamesData> {
+export async function fetchTodayGames(date: string): Promise<TodayGamesResponse> {
   await simulateNetworkLatency();
-  const effectiveDate = date ?? defaultDate;
-  return {
-    date: effectiveDate,
-    games: todayGames,
-  };
+  const res = await fetch(
+    `/api/today-games?date=${encodeURIComponent(date)}`,
+    {
+      method: "GET",
+      cache: "no-store",
+    },
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch today games: ${res.status} ${text}`);
+  }
+  return (await res.json()) as TodayGamesResponse;
 }

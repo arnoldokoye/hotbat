@@ -1,37 +1,69 @@
-import {
-  defaultDateRange,
-  defaultHomeAway,
-  defaultMinPa,
-  defaultPark,
-  defaultPitcherHand,
-  defaultSeason,
-  defaultSplit,
-  gameRows,
-  pitcherRows,
-  teamHrTimeSeries,
-  teamInfo,
-  teamKeyMetrics,
-  teamSplitsHomeAway,
-  teamSplitsLhpRhp,
-  teamSplitsMonthly,
-  teamSplitsOverview,
-  upcomingGames,
-} from "@/features/team-dashboard/mock/teamDashboardData";
 import { simulateNetworkLatency } from "./utils";
 
-export type TeamDashboardData = {
-  teamInfo: typeof teamInfo;
-  teamKeyMetrics: typeof teamKeyMetrics;
-  teamHrTimeSeries: typeof teamHrTimeSeries;
-  pitcherRows: typeof pitcherRows;
-  upcomingGames: typeof upcomingGames;
-  splits: {
-    overview: typeof teamSplitsOverview;
-    homeAway: typeof teamSplitsHomeAway;
-    lhpRhp: typeof teamSplitsLhpRhp;
-    monthly: typeof teamSplitsMonthly;
+// Types aligned with docs/Backend_API_Contracts.md
+export type TeamDashboardResponse = {
+  teamInfo: {
+    id: number;
+    name: string;
+    abbrev: string;
+    league: string;
+    division: string;
+    logoUrl?: string;
   };
-  gameRows: typeof gameRows;
+  keyMetrics: {
+    id: string;
+    label: string;
+    value: string;
+    comparisonText?: string;
+    trendDirection?: "up" | "down" | "flat";
+  }[];
+  hrTimeSeries: {
+    date: string;
+    hr: number;
+    xHr?: number;
+    avgEv?: number;
+    barrels?: number;
+  }[];
+  pitcherVulnerability: {
+    pitcherName: string;
+    pitcherTeam: string;
+    hrAllowed: number;
+    hrPer9: number;
+    avgEvAllowed?: number;
+    maxDistance?: number;
+  }[];
+  upcomingGames: {
+    gameId: number;
+    date: string;
+    opponentName: string;
+    opponentAbbrev: string;
+    parkName: string;
+    parkHrFactor?: number;
+    predictedHrMean?: number;
+    predictedHrStd?: number;
+    hotbatScore?: number;
+  }[];
+  splits: {
+    overview: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    homeAway: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    lhpRhp: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    monthly: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+  };
+  games: {
+    id: number;
+    date: string;
+    opponent: string;
+    park: string;
+    result?: string;
+    hr: number;
+    xHr?: number;
+    hrDiff?: number;
+    opposingSp?: string;
+    opposingSpHr9?: number;
+  }[];
+};
+
+export type TeamDashboardData = TeamDashboardResponse & {
   filters: {
     defaultSeason: string;
     defaultSplit: string;
@@ -43,31 +75,51 @@ export type TeamDashboardData = {
   };
 };
 
-export async function fetchTeamDashboard(teamId: string): Promise<TeamDashboardData> {
-  void teamId;
+export async function fetchTeamDashboard(params: {
+  teamId: number | string;
+  season?: number;
+  split?: string;
+  from?: string;
+  to?: string;
+}): Promise<TeamDashboardData> {
   await simulateNetworkLatency();
 
+  const {
+    teamId,
+    season = 2024,
+    split = "overall",
+    from,
+    to,
+  } = params;
+
+  const search = new URLSearchParams();
+  search.set("teamId", String(teamId));
+  if (season !== undefined) search.set("season", String(season));
+  if (split) search.set("split", split);
+  if (from) search.set("from", from);
+  if (to) search.set("to", to);
+
+  const res = await fetch(`/api/team-dashboard?${search.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch team dashboard: ${res.status} ${text}`);
+  }
+  const data = (await res.json()) as TeamDashboardResponse;
+
+  // Filters: keep previous defaults for UI compatibility
   return {
-    teamInfo,
-    teamKeyMetrics,
-    teamHrTimeSeries,
-    pitcherRows,
-    upcomingGames,
-    splits: {
-      overview: teamSplitsOverview,
-      homeAway: teamSplitsHomeAway,
-      lhpRhp: teamSplitsLhpRhp,
-      monthly: teamSplitsMonthly,
-    },
-    gameRows,
+    ...data,
     filters: {
-      defaultSeason,
-      defaultSplit,
-      defaultPark,
-      defaultHomeAway,
-      defaultDateRange,
-      defaultPitcherHand,
-      defaultMinPa,
+      defaultSeason: String(season ?? "2024"),
+      defaultSplit: split ?? "overall",
+      defaultPark: "",
+      defaultHomeAway: "all",
+      defaultDateRange: "",
+      defaultPitcherHand: "all",
+      defaultMinPa: 0,
     },
   };
 }
