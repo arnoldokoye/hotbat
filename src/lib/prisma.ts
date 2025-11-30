@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import fs from "fs";
+import path from "path";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -14,12 +16,22 @@ const globalForPrisma = globalThis as unknown as {
   adapter?: PrismaPg;
 };
 
+const defaultCaPath =
+  process.env.NODE_EXTRA_CA_CERTS ||
+  path.join(process.cwd(), "prod-ca-2021.crt");
+const sslConfig: { rejectUnauthorized: boolean; ca?: Buffer } = {
+  rejectUnauthorized: true,
+};
+if (fs.existsSync(defaultCaPath)) {
+  sslConfig.ca = fs.readFileSync(defaultCaPath);
+}
+
 // Create a Pool with SSL verification enabled; rely on system trust or NODE_EXTRA_CA_CERTS for Supabase CA.
 const pool =
   globalForPrisma.pool ??
   new Pool({
     connectionString,
-    ssl: { rejectUnauthorized: true },
+    ssl: sslConfig,
   });
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool);
 

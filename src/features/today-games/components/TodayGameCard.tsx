@@ -13,7 +13,7 @@ type TodayGameCardProps = {
 export function TodayGameCard({ game }: TodayGameCardProps) {
   const hrFriendly = game.parkHrFactor > 1.1;
   return (
-    <Card>
+    <Card dataTestId="today-game-card">
       <CardHeader>
         <div className="flex items-center gap-3">
           <TeamBadge name={game.awayTeam} logoUrl={game.awayTeamLogoUrl} />

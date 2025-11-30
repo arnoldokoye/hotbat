@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 type CardProps = {
   children: ReactNode;
   className?: string;
+  dataTestId?: string;
 };
 
 type CardSectionProps = {
@@ -13,9 +14,10 @@ type CardSectionProps = {
 /**
  * Card is a simple container with shared padding, border, and background styling.
  */
-export function Card({ children, className = "" }: CardProps) {
+export function Card({ children, className = "", dataTestId }: CardProps) {
   return (
     <div
+      data-testid={dataTestId}
       className={`rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 ${className}`}
     >
       {children}

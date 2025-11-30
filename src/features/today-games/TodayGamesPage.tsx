@@ -41,7 +41,7 @@ export function TodayGamesPage({ initialData }: { initialData: TodayGamesData })
   }, [selectedDate, setDefaults]);
 
   return (
-    <PageContainer className="flex flex-col gap-5 py-6">
+    <PageContainer className="flex flex-col gap-5 py-6" data-testid="today-games">
       <TodayGamesHeader
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}

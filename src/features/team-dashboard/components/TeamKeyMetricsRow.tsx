@@ -11,9 +11,9 @@ type TeamKeyMetricsRowProps = {
  */
 export function TeamKeyMetricsRow({ metrics }: TeamKeyMetricsRowProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {metrics.map((metric) => (
-        <MetricCard key={metric.id} metric={metric} />
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" data-testid="team-key-metrics">
+      {metrics.map((metric, index) => (
+        <MetricCard key={metric.id ?? index} metric={metric} />
       ))}
     </div>
   );
@@ -36,7 +36,7 @@ function MetricCard({ metric }: MetricCardProps) {
       : "text-slate-500";
 
   return (
-    <Card>
+    <Card dataTestId="team-key-metric">
       <CardBody className="px-4 py-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
           {label}

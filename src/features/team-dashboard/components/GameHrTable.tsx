@@ -69,7 +69,7 @@ export function GameHrTable({ rows }: GameHrTableProps) {
   };
 
   return (
-    <Card>
+    <Card dataTestId="team-games-table">
       <CardHeader>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

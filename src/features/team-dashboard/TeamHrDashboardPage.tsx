@@ -55,7 +55,7 @@ export function TeamHrDashboardPage({ initialData }: TeamHrDashboardPageProps) {
   }, [dateRange, initialData.teamInfo.teamId, season, setDefaults, split]);
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-5" data-testid="team-dashboard">
       <TeamHeader
         teamInfo={initialData.teamInfo}
         season={season}
