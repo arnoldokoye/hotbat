@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { PlayerDashboardData } from "@/lib/api/playerDashboard";
+import type { PlayerDashboardData } from "@/lib/api/fetchPlayerDashboard";
 import { useFavorites } from "@/context/FavoritesContext";
 import { PlayerFiltersStrip } from "./components/PlayerFiltersStrip";
 import { PlayerGameLogTable } from "./components/PlayerGameLogTable";
