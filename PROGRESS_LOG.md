@@ -125,3 +125,8 @@
 - Added HR Picks details & compare UI: client page with date selector, details drawer (pickScore, hotbatScore, reasons, park/hr stats), and compare panel (max 2 picks) with clear action.
 - API adds optional pick fields (parkName, parkHrFactor, hrPerPa, seasonHr) without breaking shape; docs updated accordingly.
 - Playwright hr-picks tests extended for details drawer and compare flow; skips remain deterministic when DATABASE_URL is missing/placeholder. Verification not rerun; use `npm run verify:e2e`.
+
+## 2025-12-21 14:00 UTC
+- Added ML MVP docs: docs/ml/ML_MVP_Plan.md (phase roadmap, versioning, reproducibility) and docs/ml/ML_CHANGELOG.md (init entry).
+- Added Retrosheet→PA labeling script (scripts/ml/build_player_pa_labels.py) to create deterministic PA and labeled HR datasets; outputs to data/ml/raw and data/ml/processed (git-ignored).
+- Added .gitignore entries for data/ml outputs. Verification not run; run script manually to generate datasets.
