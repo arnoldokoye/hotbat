@@ -11,7 +11,10 @@ type TeamKeyMetricsRowProps = {
  */
 export function TeamKeyMetricsRow({ metrics }: TeamKeyMetricsRowProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" data-testid="team-key-metrics">
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      data-testid="team-key-metrics"
+    >
       {metrics.map((metric, index) => (
         <MetricCard key={metric.id ?? index} metric={metric} />
       ))}

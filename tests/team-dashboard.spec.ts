@@ -1,12 +1,18 @@
 import { expect, test } from "@playwright/test";
 
-const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:3100";
 
 test.describe("Team HR Dashboard", () => {
   test("renders Yankees dashboard with metrics and games", async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
+      if (msg.type() === "error") {
+        const loc = msg.location();
+        const withLoc = loc.url
+          ? `${msg.text()} @ ${loc.url}:${loc.lineNumber ?? 0}:${loc.columnNumber ?? 0}`
+          : msg.text();
+        consoleErrors.push(withLoc);
+      }
     });
 
     await page.goto(`${BASE_URL}/team`, { waitUntil: "networkidle" });

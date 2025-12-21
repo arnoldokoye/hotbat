@@ -23,15 +23,36 @@ export type TodayGamesResponse = {
   }[];
 };
 
-export async function fetchTodayGames(date: string): Promise<TodayGamesResponse> {
+const DEFAULT_TODAY_DATE = process.env.SEED_TODAY_DATE ?? "2024-06-15";
+
+function resolveBaseUrl(explicit?: string) {
+  if (explicit) return explicit;
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  const envHost =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.VERCEL_URL ||
+    process.env.NEXTAUTH_URL;
+  if (envHost) {
+    return envHost.startsWith("http") ? envHost : `https://${envHost}`;
+  }
+  const port = process.env.PORT || "3000";
+  return `http://127.0.0.1:${port}`;
+}
+
+export async function fetchTodayGames(
+  date: string = DEFAULT_TODAY_DATE,
+  baseUrl?: string,
+): Promise<TodayGamesResponse> {
   await simulateNetworkLatency();
-  const res = await fetch(
-    `/api/today-games?date=${encodeURIComponent(date)}`,
-    {
-      method: "GET",
-      cache: "no-store",
-    },
-  );
+  const url = new URL("/api/today-games", resolveBaseUrl(baseUrl));
+  url.searchParams.set("date", date);
+
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    cache: "no-store",
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to fetch today games: ${res.status} ${text}`);

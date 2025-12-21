@@ -111,7 +111,7 @@ type TodayGame = {
   awayPredictedHrMean?: number;
   hotbatScore?: number;    // HR-friendliness score for this game
 };
-3. Player Dashboard API (later phase)
+## 3. Player Dashboard API (later phase)
 
 We are not implementing this immediately in v1 of the backend, but the eventual endpoint will look like:
 
@@ -119,7 +119,40 @@ GET /api/player-dashboard?playerId=PLAYER_ID&season=2024&from=YYYY-MM-DD&to=YYYY
 
 and return the structures already defined in docs/UI_TeamHrDashboard.md and your player-dashboard UI spec.
 
-4. Implementation Notes
+## 4. HR Picks API
+
+**Endpoint:**
+
+`GET /api/hr-picks?date=YYYY-MM-DD`
+
+**Response:**
+
+```ts
+type HrPicksResponse = {
+  date: string;
+  picks: {
+    rank: number;         // 1 = best
+    playerId: number;
+    playerName: string;
+    teamAbbrev: string;
+    hotbatScore: number;  // derived from team-level HotBat score
+    pickScore: number;    // equals hotbatScore for MVP
+    reasons: string[];    // 2–3 short explanations, never empty/undefined
+    parkName?: string;
+    parkHrFactor?: number;
+    hrPerPa?: number;
+    seasonHr?: number;
+  }[];
+};
+```
+
+**Rules:**
+- If no slate exists for the date, return `{ date, picks: [] }` with 200.
+- On server errors, the shape remains `{ date, picks: [] }`, but may return status 500 with `x-hotbat-error: 1` header for visibility.
+- Output must be deterministic for the same date input.
+- No schema or contract changes to existing APIs.
+
+## 5. Implementation Notes
 
 All dates are returned as ISO strings.
 

@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 type PlayerDashboardResponse = {
+  parkProfile?: {
+    parkName: string;
+    hrAtPark: number;
+    hrPerPaAtPark: number;
+    parkHrFactor?: number | null;
+  }[];
   playerInfo: {
     id: number;
     firstName: string;
@@ -53,7 +59,13 @@ type PlayerDashboardResponse = {
     xHr: number | null;
     avgEv: number | null;
   }[];
-  upcomingGames: unknown[];
+    upcomingGames: unknown[];
+};
+
+const logoPath = (abbrev?: string | null) => {
+  return abbrev
+    ? `/team-logos/${abbrev.toLowerCase()}.svg`
+    : "/team-logos/default.svg";
 };
 
 export async function GET(req: NextRequest) {
@@ -109,7 +121,7 @@ export async function GET(req: NextRequest) {
         xHr: s.xHr ?? null,
         avgEv: s.avgEv ?? null,
         opponent:
-          s.game.homeTeamId === s.playerId
+          s.game.homeTeamId === s.teamId
             ? s.game.awayTeam?.name ?? "Opponent"
             : s.game.homeTeam?.name ?? "Opponent",
         park: s.game.park.name,
@@ -119,7 +131,7 @@ export async function GET(req: NextRequest) {
       gameId: s.gameId,
       date: s.date.toISOString(),
       opponent:
-        s.game.homeTeamId === s.playerId
+        s.game.homeTeamId === s.teamId
           ? s.game.awayTeam?.name ?? "Opponent"
           : s.game.homeTeam?.name ?? "Opponent",
       park: s.game.park.name,
@@ -167,6 +179,30 @@ export async function GET(req: NextRequest) {
       };
     }
 
+    const parkAgg = stats.reduce<Record<string, { hr: number; pa: number; factor?: number | null }>>(
+      (acc, stat) => {
+        const parkName = stat.game.park.name ?? "Unknown Park";
+        const hr = stat.hr ?? 0;
+        const pa = stat.pa ?? 0;
+        const factor = stat.game.park.defaultHrFactor ?? null;
+        const current = acc[parkName] ?? { hr: 0, pa: 0, factor };
+        acc[parkName] = {
+          hr: current.hr + hr,
+          pa: current.pa + pa,
+          factor: current.factor ?? factor,
+        };
+        return acc;
+      },
+      {},
+    );
+
+    const parkProfile = Object.entries(parkAgg).map(([parkName, agg]) => ({
+      parkName,
+      hrAtPark: agg.hr,
+      hrPerPaAtPark: agg.pa > 0 ? agg.hr / agg.pa : 0,
+      parkHrFactor: agg.factor,
+    }));
+
     const response: PlayerDashboardResponse = {
       playerInfo: {
         id: player.id,
@@ -180,13 +216,14 @@ export async function GET(req: NextRequest) {
           abbrev: player.team.abbrev,
           league: player.team.league,
           division: player.team.division,
-          logoUrl: player.team.logoUrl ?? undefined,
+          logoUrl: logoPath(player.team.abbrev),
         },
       },
       keyMetrics,
       splits,
       hrTimeSeries,
       recentGames,
+      parkProfile,
       upcomingGames: [],
     };
 

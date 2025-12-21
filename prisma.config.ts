@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { defineConfig, env } from "prisma/config";
 
-// Load env in the same order Next.js does: base .env then override with .env.local
+// Load env in the same order Next.js does: base .env then override with .env.
 dotenv.config({ path: ".env" });
 dotenv.config({ path: ".env.local", override: true });
 
@@ -11,6 +11,6 @@ export default defineConfig({
     url: env("DATABASE_URL"),
   },
   migrations: {
-    seed: "dotenv -e .env.local -- tsx prisma/seed.ts",
+    seed: "dotenv -e .env.local -- node prisma/seed-runner.cjs",
   },
 });

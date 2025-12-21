@@ -27,6 +27,7 @@ export const navSections: { title: string; links: NavLink[] } = [
     title: "Players",
     links: [
       { label: "Player HR Dashboard", href: "/player" },
+      { label: "HR Picks", href: "/picks" },
       { label: "Leaderboards" },
       { label: "Projections" },
       { label: "Alerts" },

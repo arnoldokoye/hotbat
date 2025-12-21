@@ -26,7 +26,7 @@ export function PlayerHrTrendCard({ data }: PlayerHrTrendCardProps) {
 
   const maxValue = useMemo(() => {
     if (data.length === 0) return 1;
-    return Math.max(...data.map((point) => point[activeMetric]));
+    return Math.max(...data.map((point) => point[activeMetric] ?? 0), 1);
   }, [activeMetric, data]);
 
   return (
@@ -64,7 +64,7 @@ export function PlayerHrTrendCard({ data }: PlayerHrTrendCardProps) {
         </div>
         <div className="space-y-2">
           {data.map((point) => {
-            const value = point[activeMetric];
+            const value = point[activeMetric] ?? 0;
             const barWidth = Math.max(8, (value / maxValue) * 100);
             return (
               <div
@@ -76,7 +76,7 @@ export function PlayerHrTrendCard({ data }: PlayerHrTrendCardProps) {
                   {point.hr.toFixed(0)}
                 </span>
                 <span className="text-right text-slate-700 dark:text-slate-200">
-                  {point.xHr.toFixed(1)}
+                  {point.xHr != null ? point.xHr.toFixed(1) : "—"}
                 </span>
                 <span className="text-right text-slate-700 dark:text-slate-200">
                   {point.avgEv.toFixed(1)}

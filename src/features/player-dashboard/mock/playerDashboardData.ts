@@ -19,9 +19,11 @@ export type PlayerKeyMetric = {
 export type PlayerHrTimePoint = {
   date: string;
   hr: number;
-  xHr: number;
+  xHr: number | null;
   avgEv: number;
   barrels: number;
+  opponentTeamName?: string | null;
+  parkName?: string | null;
 };
 
 export type PitchDamageRow = {

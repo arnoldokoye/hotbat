@@ -69,6 +69,12 @@ const parseDate = (value: string | null) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+const logoPath = (abbrev?: string | null) => {
+  return abbrev
+    ? `/team-logos/${abbrev.toLowerCase()}.svg`
+    : "/team-logos/default.svg";
+};
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const teamIdParam = searchParams.get("teamId");
@@ -161,7 +167,7 @@ export async function GET(req: NextRequest) {
     summaries.find((s) => s.splitKey === "overall");
 
   const keyMetrics = summary
-    ? [
+    ? ([
         {
           id: "hr_per_game",
           label: "HR/Game",
@@ -177,21 +183,21 @@ export async function GET(req: NextRequest) {
           label: "Total HR",
           value: summary.hr.toString(),
         },
-        summary.hrVsLeaguePct !== null
+        summary.hrVsLeaguePct !== null && summary.hrVsLeaguePct !== undefined
           ? {
               id: "hr_vs_league_pct",
               label: "HR vs League %",
               value: `${summary.hrVsLeaguePct.toFixed(1)}%`,
             }
           : undefined,
-        summary.avgEv !== null
+        summary.avgEv !== null && summary.avgEv !== undefined
           ? {
               id: "avg_ev",
               label: "Avg EV",
               value: summary.avgEv.toFixed(1),
             }
           : undefined,
-      ].filter(Boolean)
+      ] as const).filter(Boolean)
     : [];
 
   const hrTimeSeries = stats.map((s) => ({
@@ -298,7 +304,7 @@ export async function GET(req: NextRequest) {
       abbrev: team.abbrev,
       league: team.league,
       division: team.division,
-      logoUrl: team.logoUrl ?? undefined,
+      logoUrl: logoPath(team.abbrev),
     },
     keyMetrics,
     hrTimeSeries,

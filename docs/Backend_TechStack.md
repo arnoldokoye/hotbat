@@ -49,6 +49,10 @@
   - Uses `src/lib/api/*` to call the backend endpoints.
   - Already has UI for Team HR Dashboard, Player Dashboard, Today’s Games.
 
+## Local Verification
+
+- Preferred single command: `npm run verify:e2e` (frees ports 3100/9333, starts dev server on 127.0.0.1:3100, runs Playwright with `PLAYWRIGHT_WEB_SERVER=0` and `BASE_URL`, then cleans up). Ensure `DATABASE_URL` is set (e.g., via `.env.local`) so Prisma-backed tests run.
+
 The backend should be implemented in a way that respects:
 - `docs/Backend_Schema_v1.md`
 - `docs/Backend_API_Contracts.md`

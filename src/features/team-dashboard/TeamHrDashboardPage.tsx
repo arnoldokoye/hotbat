@@ -55,7 +55,7 @@ export function TeamHrDashboardPage({ initialData }: TeamHrDashboardPageProps) {
   }, [dateRange, initialData.teamInfo.teamId, season, setDefaults, split]);
 
   return (
-    <section className="space-y-5" data-testid="team-dashboard">
+    <section className="space-y-6" data-testid="team-dashboard">
       <TeamHeader
         teamInfo={initialData.teamInfo}
         season={season}
@@ -80,27 +80,61 @@ export function TeamHrDashboardPage({ initialData }: TeamHrDashboardPageProps) {
         onResetFilters={handleResetFilters}
       />
 
-      <TeamKeyMetricsRow metrics={initialData.teamKeyMetrics} />
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <TeamHrTrendCard data={initialData.teamHrTimeSeries} />
-        <PitcherHrVulnerabilityCard
-          rows={initialData.pitcherRows}
-          teamName={initialData.teamInfo.teamName}
-        />
+      <div className="mt-6 space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Key Metrics</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            HR snapshot for the selected team
+          </p>
+        </div>
+        <TeamKeyMetricsRow metrics={initialData.teamKeyMetrics} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <UpcomingGamesCard games={initialData.upcomingGames} />
-        <TeamSplitsCard
-          overview={initialData.splits.overview}
-          homeAway={initialData.splits.homeAway}
-          lhpRhp={initialData.splits.lhpRhp}
-          monthly={initialData.splits.monthly}
-        />
+      <div className="mt-6 space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">HR Trend</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Rolling HR signals and pitcher risk
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <TeamHrTrendCard data={initialData.teamHrTimeSeries} />
+          <PitcherHrVulnerabilityCard
+            rows={initialData.pitcherRows}
+            teamName={initialData.teamInfo.teamName}
+          />
+        </div>
       </div>
 
-      <GameHrTable rows={initialData.gameRows} />
+      <div className="mt-6 space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+            Splits & Upcoming Games
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Context splits and short-term schedule
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <UpcomingGamesCard games={initialData.upcomingGames} />
+          <TeamSplitsCard
+            overview={initialData.splits.overview}
+            homeAway={initialData.splits.homeAway}
+            lhpRhp={initialData.splits.lhpRhp}
+            monthly={initialData.splits.monthly}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Game Log</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Game-by-game HR production
+          </p>
+        </div>
+        <GameHrTable rows={initialData.gameRows} />
+      </div>
     </section>
   );
 }

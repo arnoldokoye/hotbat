@@ -63,6 +63,12 @@ export type PlayerDashboardResponse = {
     avgEv: number | null;
   }[];
   upcomingGames: unknown[];
+  parkProfile?: {
+    parkName: string;
+    hrAtPark: number;
+    hrPerPaAtPark: number;
+    parkHrFactor?: number | null;
+  }[];
 };
 
 export type PlayerDashboardData = {
@@ -139,7 +145,11 @@ export async function fetchPlayerDashboard(
     playerId: String(apiData.playerInfo.id),
     name: `${apiData.playerInfo.firstName} ${apiData.playerInfo.lastName}`,
     teamName: apiData.playerInfo.team.name,
-    teamLogoUrl: apiData.playerInfo.team.logoUrl,
+    teamLogoUrl:
+      apiData.playerInfo.team.logoUrl ??
+      (apiData.playerInfo.team.abbrev
+        ? `/team-logos/${apiData.playerInfo.team.abbrev.toLowerCase()}.svg`
+        : "/team-logos/default.svg"),
     position: apiData.playerInfo.position,
     bats: (apiData.playerInfo.bats as PlayerInfo["bats"]) ?? "R",
     throws: "R",
@@ -156,9 +166,11 @@ export async function fetchPlayerDashboard(
   const playerHrTimeSeries: PlayerHrTimePoint[] = apiData.hrTimeSeries.map((p) => ({
     date: p.date,
     hr: p.hr,
-    xHr: p.xHr ?? 0,
+    xHr: p.xHr,
     avgEv: p.avgEv ?? 0,
     barrels: 0,
+    opponentTeamName: p.opponent,
+    parkName: p.park,
   }));
 
   const gameLog: PlayerGameLogRow[] = apiData.recentGames.map((g) => ({
@@ -184,12 +196,21 @@ export async function fetchPlayerDashboard(
     }),
   );
 
+  const parkProfileRows: ParkProfileRow[] =
+    apiData.parkProfile?.map((p, idx) => ({
+      parkName: p.parkName,
+      hrAtPark: p.hrAtPark,
+      hrPerPaAtPark: Number.isFinite(p.hrPerPaAtPark) ? p.hrPerPaAtPark : 0,
+      parkHrFactor: p.parkHrFactor ?? 1,
+      id: `park-${idx}`,
+    })) ?? [];
+
   return {
     playerInfo,
     playerKeyMetrics,
     playerHrTimeSeries,
     pitchDamageRows: [],
-    parkProfileRows: [],
+    parkProfileRows,
     splits: {
       overview: splitsOverview,
       homeAway: [],

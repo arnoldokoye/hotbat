@@ -6,6 +6,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Bats {
+  L
+  R
+  S
+}
+
+enum HomeAway {
+  home
+  away
+}
+
 model Team {
   id            Int     @id @default(autoincrement())
   name          String
@@ -20,9 +31,11 @@ model Team {
   homeGames         Game[]             @relation("HomeGames")
   awayGames         Game[]             @relation("AwayGames")
   teamGameStats     TeamGameHrStats[]
+  playerGameStats   PlayerGameStats[]
   opponentGameStats TeamGameHrStats[]  @relation("OpponentTeam")
   teamSummaries     TeamHrSummary[]
   gamePredictions   GameHrPrediction[]
+  players           Player[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,10 +49,11 @@ model Park {
   country         String?
   defaultHrFactor Float?
 
-  teams         Team[]
-  games         Game[]
-  teamGameStats TeamGameHrStats[]
-  parkHrFactors ParkHrFactor[]
+  teams           Team[]
+  games           Game[]
+  teamGameStats   TeamGameHrStats[]
+  playerGameStats PlayerGameStats[]
+  parkHrFactors   ParkHrFactor[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -64,6 +78,7 @@ model Game {
   park     Park @relation(fields: [parkId], references: [id])
 
   teamGameStats   TeamGameHrStats[]
+  playerGameStats PlayerGameStats[]
   gamePredictions GameHrPrediction[]
 
   createdAt DateTime @default(now())
@@ -98,6 +113,87 @@ model TeamGameHrStats {
 
   @@index([teamId, date])
   @@index([gameId])
+}
+
+model Player {
+  id         Int      @id @default(autoincrement())
+  teamId     Int
+  firstName  String
+  lastName   String
+  bats       Bats
+  position   String
+  heightCm   Int?
+  weightKg   Int?
+  mlbId      String?  @unique
+  statcastId String?  @unique
+
+  team            Team             @relation(fields: [teamId], references: [id])
+  gameStats       PlayerGameStats[]
+  hrSummaries     PlayerHrSummary[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([teamId])
+  @@index([lastName, firstName, teamId])
+}
+
+model PlayerGameStats {
+  id           Int       @id @default(autoincrement())
+  playerId     Int
+  gameId       Int
+  teamId       Int
+  season       Int
+  date         DateTime
+  homeOrAway   HomeAway
+  matchupHand  Bats
+  parkId       Int
+  pa           Int
+  hr           Int
+  xHr          Float?
+  avgEv        Float?
+  barrels      Int?
+  barrelRate   Float?
+  hardHitRate  Float?
+  iso          Float?
+  woba         Float?
+
+  player       Player @relation(fields: [playerId], references: [id])
+  game         Game   @relation(fields: [gameId], references: [id])
+  team         Team   @relation(fields: [teamId], references: [id])
+  park         Park   @relation(fields: [parkId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([playerId, gameId])
+  @@index([playerId, season])
+  @@index([playerId, matchupHand])
+  @@index([playerId, homeOrAway])
+  @@index([playerId, parkId])
+  @@index([teamId, season])
+}
+
+model PlayerHrSummary {
+  id           Int      @id @default(autoincrement())
+  playerId     Int
+  season       Int
+  splitKey     String
+  gamesPlayed  Int
+  pa           Int?
+  hr           Int
+  xHr          Float?
+  hrPerPa      Float?
+  barrelRate   Float?
+  avgEv        Float?
+  hardHitRate  Float?
+  iso          Float?
+
+  player       Player @relation(fields: [playerId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([playerId, season, splitKey])
+  @@index([playerId, splitKey])
+  @@index([season, splitKey])
 }
 
 model TeamHrSummary {

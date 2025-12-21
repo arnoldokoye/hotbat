@@ -154,8 +154,8 @@ export async function fetchTeamDashboard(params: {
   const teamLogoUrl =
     data.teamInfo.logoUrl ??
     (data.teamInfo.abbrev
-      ? `https://a.espncdn.com/i/teamlogos/mlb/500/${data.teamInfo.abbrev.toLowerCase()}.png`
-      : "https://a.espncdn.com/i/teamlogos/mlb/500/mlb.png");
+      ? `/team-logos/${data.teamInfo.abbrev.toLowerCase()}.svg`
+      : "/team-logos/default.svg");
 
   const teamInfo: TeamInfo = {
     teamId: data.teamInfo.abbrev || String(data.teamInfo.id),
@@ -196,12 +196,14 @@ export async function fetchTeamDashboard(params: {
     const std = game.predictedHrStd ?? 0;
     const projectedHrMin = Math.max(0, projectedMean - std);
     const projectedHrMax = Math.max(projectedHrMin, projectedMean + std);
+    const opponentLogo =
+      game.opponentAbbrev && game.opponentAbbrev.length > 0
+        ? `/team-logos/${game.opponentAbbrev.toLowerCase()}.svg`
+        : "/team-logos/default.svg";
     return {
       date: game.date ? game.date.slice(0, 10) : "",
       opponentName: game.opponentName,
-      opponentLogoUrl: game.opponentAbbrev
-        ? `https://a.espncdn.com/i/teamlogos/mlb/500/${game.opponentAbbrev.toLowerCase()}.png`
-        : undefined,
+      opponentLogoUrl: opponentLogo,
       parkName: game.parkName,
       parkHrFactor: game.parkHrFactor ?? 1,
       projectedHrMin,

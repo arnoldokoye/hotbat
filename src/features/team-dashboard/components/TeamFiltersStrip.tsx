@@ -29,11 +29,12 @@ export function TeamFiltersStrip({
   onResetFilters,
 }: TeamFiltersStripProps) {
   return (
-    <Card>
-      <CardBody className="px-6 py-5">
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+    <Card data-testid="team-filters-strip">
+      <CardBody className="px-5 py-4 md:px-6 md:py-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <FilterField label="Date Range">
             <Select
+              data-testid="team-filter-date-range"
               value={dateRange}
               onChange={(event) => onDateRangeChange(event.target.value)}
             >
@@ -47,6 +48,7 @@ export function TeamFiltersStrip({
 
           <FilterField label="Vs Pitcher Hand">
             <Select
+              data-testid="team-filter-pitcher-hand"
               value={pitcherHand}
               onChange={(event) => onPitcherHandChange(event.target.value)}
             >
@@ -60,6 +62,7 @@ export function TeamFiltersStrip({
 
           <FilterField label="Min PA">
             <input
+              data-testid="team-filter-min-pa"
               type="number"
               min={0}
               value={minPA}
@@ -72,7 +75,12 @@ export function TeamFiltersStrip({
             <Button type="button" variant="secondary" className="flex-1">
               Advanced Filters
             </Button>
-            <Button type="button" onClick={onResetFilters} variant="primary">
+            <Button
+              type="button"
+              onClick={onResetFilters}
+              variant="primary"
+              data-testid="team-filter-reset"
+            >
               Reset
             </Button>
           </div>

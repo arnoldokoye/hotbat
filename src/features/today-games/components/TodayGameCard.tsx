@@ -60,17 +60,17 @@ export function TodayGameCard({ game }: TodayGameCardProps) {
           <div className="mt-2 grid gap-2 text-sm">
             <PitcherRow
               label="Away SP"
-              name={game.awayStartingPitcher.name}
-              throws={game.awayStartingPitcher.throws}
-              hrPer9={game.awayStartingPitcher.hrPer9}
-              era={game.awayStartingPitcher.era}
+              name={game.awayStartingPitcher?.name ?? "TBD"}
+              throws={game.awayStartingPitcher?.throws ?? "R"}
+              hrPer9={game.awayStartingPitcher?.hrPer9 ?? 0}
+              era={game.awayStartingPitcher?.era ?? 0}
             />
             <PitcherRow
               label="Home SP"
-              name={game.homeStartingPitcher.name}
-              throws={game.homeStartingPitcher.throws}
-              hrPer9={game.homeStartingPitcher.hrPer9}
-              era={game.homeStartingPitcher.era}
+              name={game.homeStartingPitcher?.name ?? "TBD"}
+              throws={game.homeStartingPitcher?.throws ?? "R"}
+              hrPer9={game.homeStartingPitcher?.hrPer9 ?? 0}
+              era={game.homeStartingPitcher?.era ?? 0}
             />
           </div>
         </div>

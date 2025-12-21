@@ -11,7 +11,10 @@ type PlayerKeyMetricsRowProps = {
  */
 export function PlayerKeyMetricsRow({ metrics }: PlayerKeyMetricsRowProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      data-testid="player-key-metrics"
+    >
       {metrics.map((metric) => (
         <MetricCard key={metric.id} metric={metric} />
       ))}
@@ -36,7 +39,7 @@ function MetricCard({ metric }: MetricCardProps) {
       : "text-slate-500";
 
   return (
-    <Card>
+    <Card dataTestId="player-key-metric">
       <CardBody className="px-4 py-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
           {label}
