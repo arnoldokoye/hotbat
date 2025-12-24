@@ -4,22 +4,37 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Select } from "@/components/ui/Select";
 
-const SEASON_OPTIONS = ["2024"];
-const SPLIT_OPTIONS = ["overall", "home", "away", "month:2024-06"];
-
 type PlayerFiltersProps = {
-  playerId: number;
+  mode?: "db" | "csv";
+  playerId: number | string;
   season: number;
   split: string;
+  seasonOptions?: number[];
 };
 
-export function PlayerFilters({ playerId, season, split }: PlayerFiltersProps) {
+const DEFAULT_DB_SEASONS = [2024];
+const DEFAULT_SPLITS = ["overall", "home", "away"];
+const CSV_SPLITS = ["overall", "home", "away", "lhp", "rhp"];
+
+export function PlayerFilters({
+  mode = "db",
+  playerId,
+  season,
+  split,
+  seasonOptions,
+}: PlayerFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("playerId", String(playerId));
+    if (mode === "csv") {
+      params.delete("playerId");
+      params.set("player_id", String(playerId));
+    } else {
+      params.delete("player_id");
+      params.set("playerId", String(playerId));
+    }
     params.set(key, value);
     // Preserve the other param: if updating season, keep split; if updating split, keep season.
     if (key === "season" && !params.get("split")) {
@@ -40,8 +55,11 @@ export function PlayerFilters({ playerId, season, split }: PlayerFiltersProps) {
         data-testid="player-season-selector"
         aria-label="Player season selector"
       >
-        {SEASON_OPTIONS.map((option) => (
-          <option key={option} value={option}>
+        {(mode === "csv"
+          ? (seasonOptions?.length ? seasonOptions : DEFAULT_DB_SEASONS)
+          : DEFAULT_DB_SEASONS
+        ).map((option) => (
+          <option key={option} value={String(option)}>
             {option}
           </option>
         ))}
@@ -54,7 +72,7 @@ export function PlayerFilters({ playerId, season, split }: PlayerFiltersProps) {
         data-testid="player-split-selector"
         aria-label="Player split selector"
       >
-        {SPLIT_OPTIONS.map((option) => (
+        {(mode === "csv" ? CSV_SPLITS : DEFAULT_SPLITS).map((option) => (
           <option key={option} value={option}>
             {option}
           </option>

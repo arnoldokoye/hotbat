@@ -1,7 +1,7 @@
 {
-  "/api/hr-picks/route": "app/api/hr-picks/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/player-dashboard/route": "app/api/player-dashboard/route.js",
-  "/api/slates/latest/route": "app/api/slates/latest/route.js",
+  "/api/players/route": "app/api/players/route.js",
   "/api/team-dashboard/route": "app/api/team-dashboard/route.js",
   "/api/today-games/route": "app/api/today-games/route.js",
   "/picks/page": "app/picks/page.js",

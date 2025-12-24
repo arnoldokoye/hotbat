@@ -173,6 +173,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../src/app/api/players/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/players">> = Specific
+  const handler = {} as typeof import("../../../src/app/api/players/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../src/app/api/slates/latest/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/slates/latest">> = Specific
@@ -240,6 +249,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/teams/[teamId]/upcoming-games">> = Specific
   const handler = {} as typeof import("../../../src/app/api/teams/[teamId]/upcoming-games/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../src/app/api/teams/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/teams">> = Specific
+  const handler = {} as typeof import("../../../src/app/api/teams/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

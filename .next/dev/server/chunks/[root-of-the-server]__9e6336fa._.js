@@ -102,17 +102,59 @@ if (!connectionString) {
 // Ensure a single PrismaClient/Pool instance across hot reloads in dev.
 const globalForPrisma = globalThis;
 const defaultCaPath = process.env.NODE_EXTRA_CA_CERTS || __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), "prod-ca-2021.crt");
-const sslConfig = {
-    rejectUnauthorized: true
+const caFileExists = ("TURBOPACK compile-time truthy", 1) ? __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].existsSync(defaultCaPath) : "TURBOPACK unreachable";
+const caBuffer = caFileExists ? __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].readFileSync(defaultCaPath) : undefined;
+const allowInsecureEnv = process.env.DB_SSL_ALLOW_INSECURE === "1" || process.env.DB_SSL_ALLOW_INSECURE === "true" || process.env.NODE_TLS_REJECT_UNAUTHORIZED === "0";
+const connectionTimeoutMs = Number.parseInt(process.env.DB_CONNECTION_TIMEOUT_MS ?? "", 10) || 5000;
+const buildPool = (rejectUnauthorized)=>{
+    const ssl = {
+        rejectUnauthorized
+    };
+    if (caBuffer) {
+        ssl.ca = caBuffer;
+    }
+    return {
+        pool: new __TURBOPACK__imported__module__$5b$externals$5d2f$pg__$5b$external$5d$__$28$pg$2c$__esm_import$29$__["Pool"]({
+            connectionString,
+            ssl,
+            connectionTimeoutMillis: connectionTimeoutMs
+        }),
+        usedInsecure: !rejectUnauthorized
+    };
 };
-if (__TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].existsSync(defaultCaPath)) {
-    sslConfig.ca = __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].readFileSync(defaultCaPath);
-}
-// Create a Pool with SSL verification enabled; rely on system trust or NODE_EXTRA_CA_CERTS for Supabase CA.
-const pool = globalForPrisma.pool ?? new __TURBOPACK__imported__module__$5b$externals$5d2f$pg__$5b$external$5d$__$28$pg$2c$__esm_import$29$__["Pool"]({
-    connectionString,
-    ssl: sslConfig
-});
+const isTlsError = (error)=>{
+    if (!error || typeof error !== "object") return false;
+    const code = error.code ?? "";
+    const message = error.message ?? "";
+    const tlsCodes = [
+        "SELF_SIGNED_CERT_IN_CHAIN",
+        "DEPTH_ZERO_SELF_SIGNED_CERT",
+        "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "ERR_TLS_CERT_ALTNAME_INVALID",
+        "UNABLE_TO_GET_ISSUER_CERT_LOCALLY"
+    ];
+    return tlsCodes.includes(code) || message.toLowerCase().includes("certificate");
+};
+const initPool = async ()=>{
+    const primary = buildPool(!allowInsecureEnv);
+    const warmupResult = await primary.pool.query("SELECT 1").then(()=>"ok").catch((error)=>{
+        if (!allowInsecureEnv && isTlsError(error)) {
+            return "tls-error";
+        }
+        console.warn("Database warm-up query failed; continuing with current SSL config.", error);
+        return "failed";
+    });
+    if (warmupResult === "tls-error") {
+        await primary.pool.end().catch(()=>{});
+        console.warn("Database TLS verification failed; retrying with rejectUnauthorized=false. " + "Provide NODE_EXTRA_CA_CERTS with your trusted root to restore verification.");
+        return buildPool(false);
+    }
+    return primary;
+};
+const { pool, usedInsecure } = globalForPrisma.pool && typeof globalForPrisma.__dbUsedInsecureSsl === "boolean" ? {
+    pool: globalForPrisma.pool,
+    usedInsecure: globalForPrisma.__dbUsedInsecureSsl
+} : await initPool();
 const adapter = globalForPrisma.adapter ?? new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$prisma$2f$adapter$2d$pg$2f$dist$2f$index$2e$mjs__$5b$app$2d$route$5d$__$28$ecmascript$29$__["PrismaPg"](pool);
 const prisma = globalForPrisma.prisma ?? new __TURBOPACK__imported__module__$5b$externals$5d2f40$prisma$2f$client__$5b$external$5d$__$2840$prisma$2f$client$2c$__cjs$29$__["PrismaClient"]({
     adapter,
@@ -125,10 +167,11 @@ if ("TURBOPACK compile-time truthy", 1) {
     globalForPrisma.pool = pool;
     globalForPrisma.adapter = adapter;
     globalForPrisma.prisma = prisma;
+    globalForPrisma.__dbUsedInsecureSsl = usedInsecure;
 }
 const __TURBOPACK__default__export__ = prisma;
 __turbopack_async_result__();
-} catch(e) { __turbopack_async_result__(e); } }, false);}),
+} catch(e) { __turbopack_async_result__(e); } }, true);}),
 "[project]/src/app/api/slates/latest/route.ts [app-route] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 

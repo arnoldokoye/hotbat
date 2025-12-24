@@ -7,9 +7,11 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { Select } from "@/components/ui/Select";
 import { navSections } from "./SidebarNav";
 
-const seasons = ["2025", "2024", "2023"];
+type TopNavProps = {
+  dbSeasons: number[];
+};
 
-export function TopNav() {
+export function TopNav({ dbSeasons }: TopNavProps) {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "light";
     const stored = window.localStorage.getItem("hotbat-theme") as
@@ -61,15 +63,17 @@ export function TopNav() {
 
         <div className="flex flex-1 justify-center">
           <label className="sr-only" htmlFor="season-select">
-            Season
+            Season (DB)
           </label>
           <Select
             id="season-select"
-            defaultValue={seasons[0]}
+            defaultValue={dbSeasons.length ? String(dbSeasons[dbSeasons.length - 1]) : ""}
             className="min-w-[8rem]"
+            disabled={!dbSeasons.length}
           >
-            {seasons.map((season) => (
-              <option key={season} value={season}>
+            {dbSeasons.length ? null : <option value="">No DB seasons</option>}
+            {dbSeasons.map((season) => (
+              <option key={season} value={String(season)}>
                 Season {season}
               </option>
             ))}

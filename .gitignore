@@ -1,3 +1,6 @@
 # ML data outputs (keep large artifacts out of git)
 data/ml/raw/
 data/ml/processed/
+scripts/ml/data/
+public/data/player_game_baseline.csv
+public/data/season_metadata.json

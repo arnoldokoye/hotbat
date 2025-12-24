@@ -1,18 +1,33 @@
-import { headers } from "next/headers";
-import { fetchHrPicks } from "@/lib/api/fetchHrPicks";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import { fetchBaselineHrPicks } from "@/lib/baseline/fetchBaselineHrPicks";
+import { getCsvDateIndex } from "@/lib/dataAvailability";
 import { HrPicksPage } from "@/features/hr-picks/HrPicksPage";
 
 type PicksPageProps =
   | { searchParams?: { date?: string } }
   | { searchParams?: Promise<{ date?: string }> };
 
-async function fetchLatestDate(baseUrl?: string): Promise<string | null> {
+type SeasonMeta = {
+  complete?: boolean;
+  covid_season?: boolean;
+};
+
+async function getSeasonMetadata(): Promise<Record<number, SeasonMeta> | null> {
   try {
-    const url = new URL("/api/slates/latest", baseUrl || "http://127.0.0.1:3000");
-    const res = await fetch(url.toString(), { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { latestDate: string | null };
-    return data.latestDate ?? null;
+    const seasonMetaPath = path.join(process.cwd(), "public", "data", "season_metadata.json");
+    const text = await fs.readFile(seasonMetaPath, "utf8");
+    const parsed = JSON.parse(text) as Record<string, SeasonMeta>;
+    if (!parsed || typeof parsed !== "object") return null;
+
+    const out: Record<number, SeasonMeta> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      const n = Number.parseInt(k, 10);
+      if (!Number.isFinite(n)) continue;
+      out[n] = v ?? {};
+    }
+    return out;
   } catch {
     return null;
   }
@@ -24,23 +39,29 @@ export default async function PicksPage({ searchParams }: PicksPageProps) {
       ? await (searchParams as Promise<{ date?: string }>)
       : (searchParams as { date?: string } | undefined) ?? {};
 
-  const headersList = await headers();
-  const host = headersList.get("host");
-  const protocol = headersList.get("x-forwarded-proto") ?? "http";
-  const baseUrl = host ? `${protocol}://${host}` : undefined;
-
-  const latestDate = await fetchLatestDate(baseUrl);
-  const effectiveDate = params.date ?? latestDate ?? "";
+  const [csvIndex, seasonMetadata] = await Promise.all([getCsvDateIndex(), getSeasonMetadata()]);
+  const requestedDate = (params.date ?? "").trim();
+  const effectiveDate =
+    requestedDate && csvIndex.dates.includes(requestedDate)
+      ? requestedDate
+      : csvIndex.maxDate || "";
 
   let picksData;
   try {
-    picksData = effectiveDate
-      ? await fetchHrPicks(effectiveDate, baseUrl)
-      : { date: "", picks: [] };
+    picksData = await fetchBaselineHrPicks(effectiveDate);
   } catch (error) {
-    console.error("hr-picks page fetch error", error);
-    picksData = { date: effectiveDate, picks: [] };
+    // Leave noisy logging to the server; keep client console clean for expected failures.
+    console.warn("hr-picks page fetch warning", error);
+    picksData = { date: effectiveDate, picks: [], availableDates: [] };
   }
 
-  return <HrPicksPage initialData={picksData} latestDate={latestDate} />;
+  return (
+    <HrPicksPage
+      key={picksData.date}
+      initialData={picksData}
+      latestDate={csvIndex.maxDate || null}
+      csvIndex={csvIndex}
+      seasonMetadata={seasonMetadata ?? undefined}
+    />
+  );
 }

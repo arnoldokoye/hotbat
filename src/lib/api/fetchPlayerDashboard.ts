@@ -26,6 +26,13 @@ export type PlayerDashboardResponse = {
       logoUrl?: string;
     };
   };
+  baseline?: {
+    hrProb?: number | null;
+    expectedHr?: number | null;
+    seasonHr?: number | null;
+    seasonPa?: number | null;
+    notes?: string;
+  };
   keyMetrics: {
     label: string;
     value: number | null;
@@ -77,6 +84,13 @@ export type PlayerDashboardData = {
   playerHrTimeSeries: PlayerHrTimePoint[];
   pitchDamageRows: PitchDamageRow[];
   parkProfileRows: ParkProfileRow[];
+  baseline?: {
+    hrProb?: number | null;
+    expectedHr?: number | null;
+    seasonHr?: number | null;
+    seasonPa?: number | null;
+    notes?: string;
+  };
   splits: {
     overview: PlayerSplitRow[];
     homeAway: PlayerSplitRow[];
@@ -94,10 +108,9 @@ export type PlayerDashboardData = {
 };
 
 export type PlayerDashboardParams = {
-  playerId: number;
   season?: number;
   split?: string;
-};
+} & ({ playerId: number } | { player_id: string });
 
 function resolveBaseUrl(explicit?: string) {
   if (explicit) return explicit;
@@ -120,9 +133,13 @@ export async function fetchPlayerDashboard(
 ): Promise<PlayerDashboardData> {
   await simulateNetworkLatency();
 
-  const { playerId, season = 2024, split = "overall" } = params;
+  const { season = 2024, split = "overall" } = params;
   const search = new URLSearchParams();
-  search.set("playerId", String(playerId));
+  if ("player_id" in params) {
+    search.set("player_id", params.player_id);
+  } else {
+    search.set("playerId", String(params.playerId));
+  }
   search.set("season", String(season));
   if (split) search.set("split", split);
 
@@ -141,8 +158,13 @@ export async function fetchPlayerDashboard(
   }
   const apiData = (await res.json()) as PlayerDashboardResponse;
 
+  const stablePlayerId =
+    res.headers.get("x-hotbat-source") === "csv" && "player_id" in params
+      ? params.player_id
+      : String(apiData.playerInfo.id);
+
   const playerInfo: PlayerInfo = {
-    playerId: String(apiData.playerInfo.id),
+    playerId: stablePlayerId,
     name: `${apiData.playerInfo.firstName} ${apiData.playerInfo.lastName}`,
     teamName: apiData.playerInfo.team.name,
     teamLogoUrl:
@@ -205,12 +227,31 @@ export async function fetchPlayerDashboard(
       id: `park-${idx}`,
     })) ?? [];
 
+  const asBaseline = apiData.baseline;
+  const cleanNumber = (v: unknown, allowZero = true) => {
+    const num = typeof v === "number" ? v : Number.NaN;
+    if (!Number.isFinite(num)) return null;
+    if (!allowZero && num === 0) return null;
+    return num;
+  };
+
+  const baseline = asBaseline
+    ? {
+        hrProb: cleanNumber(asBaseline.hrProb),
+        expectedHr: cleanNumber(asBaseline.expectedHr),
+        seasonHr: cleanNumber(asBaseline.seasonHr, true),
+        seasonPa: cleanNumber(asBaseline.seasonPa, true),
+        notes: asBaseline.notes,
+      }
+    : undefined;
+
   return {
     playerInfo,
     playerKeyMetrics,
     playerHrTimeSeries,
     pitchDamageRows: [],
     parkProfileRows,
+    baseline,
     splits: {
       overview: splitsOverview,
       homeAway: [],

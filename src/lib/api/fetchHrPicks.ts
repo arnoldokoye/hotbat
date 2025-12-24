@@ -46,8 +46,13 @@ export async function fetchHrPicks(
 
   const res = await fetch(url.toString(), { cache: "no-store" });
   if (!res.ok) {
+    const isExpected =
+      res.headers.get("x-hotbat-error") === "1" || res.status >= 500;
     const body = await res.json().catch(() => null);
     const message = body?.error ?? `Failed to fetch HR picks: ${res.status}`;
+    if (isExpected) {
+      return { date, picks: [] };
+    }
     throw new Error(message);
   }
   return (await res.json()) as HrPicksResponse;

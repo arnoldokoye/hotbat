@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * One-command E2E verification:
  * - Frees ports 3100/9333 if occupied

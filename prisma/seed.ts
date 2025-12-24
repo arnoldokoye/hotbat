@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -7,15 +9,76 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is required to run the seed");
 }
 
-const pool = new Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: true },
-});
-const adapter = new PrismaPg(pool);
+const defaultCaPath =
+  process.env.NODE_EXTRA_CA_CERTS ||
+  path.join(process.cwd(), "prod-ca-2021.crt");
+const caBuffer =
+  defaultCaPath && fs.existsSync(defaultCaPath)
+    ? fs.readFileSync(defaultCaPath)
+    : undefined;
+const allowInsecureEnv =
+  process.env.DB_SSL_ALLOW_INSECURE === "1" ||
+  process.env.DB_SSL_ALLOW_INSECURE === "true" ||
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED === "0";
+const connectionTimeoutMs =
+  Number.parseInt(process.env.DB_CONNECTION_TIMEOUT_MS ?? "", 10) || 5000;
 
-const prisma = new PrismaClient({
-  adapter,
-});
+const buildPool = (rejectUnauthorized: boolean) =>
+  new Pool({
+    connectionString,
+    ssl: caBufferexport
+      ? { rejectUnauthorized, ca: caBuffer }
+      : { rejectUnauthorized },
+    connectionTimeoutMillis: connectionTimeoutMs,
+  });
+
+const isTlsError = (error: unknown) => {
+  if (!error || typeof error !== "object") return false;
+  const code = (error as { code?: string }).code ?? "";
+  const message = (error as { message?: string }).message ?? "";
+  const tlsCodes = [
+    "SELF_SIGNED_CERT_IN_CHAIN",
+    "DEPTH_ZERO_SELF_SIGNED_CERT",
+    "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+    "ERR_TLS_CERT_ALTNAME_INVALID",
+    "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+  ];
+  return tlsCodes.includes(code) || message.toLowerCase().includes("certificate");
+};
+
+const initPrismaClient = async () => {
+  const strictPool = buildPool(!allowInsecureEnv);
+  const warmup = await strictPool
+    .query("SELECT 1")
+    .then(() => "ok" as const)
+    .catch((error) => {
+      if (!allowInsecureEnv && isTlsError(error)) return "tls-error" as const;
+      console.warn(
+        "Seed warm-up query failed; continuing with current SSL config.",
+        error,
+      );
+      return "failed" as const;
+    });
+
+  const poolToUse =
+    warmup === "tls-error"
+      ? (() => {
+          console.warn(
+            "Seed retrying with rejectUnauthorized=false due to TLS failure.",
+          );
+          void strictPool.end().catch(() => {});
+          return buildPool(false);
+        })()
+      : strictPool;
+
+  const adapter = new PrismaPg(poolToUse);
+  const prisma = new PrismaClient({ adapter });
+  await prisma.$connect();
+  await prisma.$queryRaw`SELECT 1`;
+  return { prisma, pool: poolToUse };
+};
+
+const { prisma, pool } = await initPrismaClient();
 
 async function main() {
   // Clear existing data in dependency-safe order

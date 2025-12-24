@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { loadBallparks } from "@/lib/csv/ballparks";
+import { loadDailyTeamStats } from "@/lib/csv/dailyTeamStats";
+import { loadTeams } from "@/lib/csv/teams";
 
 type TeamDashboardResponse = {
   teamInfo: {
@@ -75,29 +78,216 @@ const logoPath = (abbrev?: string | null) => {
     : "/team-logos/default.svg";
 };
 
+const logoFromRetrosheetTeam = (teamId: string) => {
+  const id = teamId.trim().toUpperCase();
+  if (id === "NYA") return logoPath("nyy");
+  if (id === "BOS") return logoPath("bos");
+  return logoPath(null);
+};
+
+function yyyymmddToIsoDate(value: string): string | null {
+  const v = value.trim();
+  if (!/^\d{8}$/.test(v)) return null;
+  return `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`;
+}
+
+function isoDateToTimestamp(value: string): string {
+  return `${value}T00:00:00.000Z`;
+}
+
+function hash32FNV1a(input: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+function safeDiv(numer: number, denom: number): number | null {
+  if (!Number.isFinite(numer) || !Number.isFinite(denom) || denom <= 0) return null;
+  return numer / denom;
+}
+
+async function loadTeamDashboardFromCsv(args: {
+  teamId: string;
+  season: number;
+  from: Date | undefined;
+  to: Date | undefined;
+  splitKey: string;
+}): Promise<TeamDashboardResponse | null> {
+  const { teamId, season, from, to, splitKey: _splitKey } = args;
+  void _splitKey;
+
+  const [rows, teams, parks] = await Promise.all([
+    loadDailyTeamStats(season),
+    loadTeams().catch(() => []),
+    loadBallparks().catch(() => new Map<string, string>()),
+  ]);
+
+  const teamNameById = new Map(teams.map((t) => [t.team_id, t.team_name] as const));
+  const teamLeagueById = new Map(teams.map((t) => [t.team_id, t.league] as const));
+
+  const fromIso = from ? from.toISOString().slice(0, 10) : null;
+  const toIso = to ? to.toISOString().slice(0, 10) : null;
+
+  type TeamGame = {
+    gid: string;
+    date: string; // ISO YYYY-MM-DD
+    opp: string;
+    vishome: "h" | "v" | "";
+    site: string;
+    hr: number;
+    pa: number;
+    win: number;
+    loss: number;
+    tie: number;
+  };
+
+  const byGid = new Map<string, TeamGame>();
+
+  for (const row of rows) {
+    if (row.team_id !== teamId) continue;
+    const dateIso = yyyymmddToIsoDate(row.date);
+    if (!dateIso) continue;
+    if (fromIso && dateIso < fromIso) continue;
+    if (toIso && dateIso > toIso) continue;
+
+    const existing = byGid.get(row.gid);
+    if (existing) {
+      existing.hr += row.b_hr;
+      existing.pa += row.b_pa;
+      existing.win = existing.win || row.win;
+      existing.loss = existing.loss || row.loss;
+      existing.tie = existing.tie || row.tie;
+      continue;
+    }
+
+    byGid.set(row.gid, {
+      gid: row.gid,
+      date: dateIso,
+      opp: row.opp,
+      vishome: row.vishome,
+      site: row.site,
+      hr: row.b_hr,
+      pa: row.b_pa,
+      win: row.win,
+      loss: row.loss,
+      tie: row.tie,
+    });
+  }
+
+  const games = Array.from(byGid.values());
+  games.sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return a.gid.localeCompare(b.gid);
+  });
+
+  if (!games.length) return null;
+
+  const gamesPlayed = games.length;
+  const totalHr = games.reduce((sum, g) => sum + g.hr, 0);
+  const hrPerGame = safeDiv(totalHr, gamesPlayed) ?? 0;
+
+  const homeGames = games.filter((g) => g.vishome === "h");
+  const awayGames = games.filter((g) => g.vishome === "v");
+  const homeHrPerGame = safeDiv(homeGames.reduce((sum, g) => sum + g.hr, 0), homeGames.length) ?? 0;
+  const awayHrPerGame = safeDiv(awayGames.reduce((sum, g) => sum + g.hr, 0), awayGames.length) ?? 0;
+
+  const monthlyAgg = games.reduce<Record<string, { hr: number; games: number }>>((acc, g) => {
+    const key = g.date.slice(0, 7);
+    acc[key] ??= { hr: 0, games: 0 };
+    acc[key].hr += g.hr;
+    acc[key].games += 1;
+    return acc;
+  }, {});
+
+  const monthly = Object.entries(monthlyAgg)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, agg]) => ({ label: month, hrPerGame: safeDiv(agg.hr, agg.games) ?? 0 }));
+
+  const teamName = teamNameById.get(teamId) ?? teamId;
+  const league = teamLeagueById.get(teamId) ?? "";
+
+  const keyMetrics: TeamDashboardResponse["keyMetrics"] = [
+    { id: "hr_per_game", label: "HR/Game", value: hrPerGame.toFixed(2) },
+    { id: "games_played", label: "Games", value: gamesPlayed.toString() },
+    { id: "total_hr", label: "Total HR", value: totalHr.toString() },
+  ];
+
+  const hrTimeSeries: TeamDashboardResponse["hrTimeSeries"] = games.map((g) => ({
+    date: isoDateToTimestamp(g.date),
+    hr: g.hr,
+  }));
+
+  const gamesTable: TeamDashboardResponse["games"] = games
+    .slice()
+    .sort((a, b) => {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return b.gid.localeCompare(a.gid);
+    })
+    .map((g) => {
+      const result = g.win ? "W" : g.loss ? "L" : g.tie ? "T" : undefined;
+      return {
+        id: hash32FNV1a(g.gid),
+        date: isoDateToTimestamp(g.date),
+        opponent: teamNameById.get(g.opp) ?? g.opp ?? "Opponent",
+        park: parks.get(g.site) ?? g.site ?? "Park",
+        result,
+        hr: g.hr,
+      };
+    });
+
+  const response: TeamDashboardResponse = {
+    teamInfo: {
+      id: 0,
+      name: teamName,
+      abbrev: teamId,
+      league: league ?? "",
+      division: "—",
+      logoUrl: logoFromRetrosheetTeam(teamId),
+    },
+    keyMetrics,
+    hrTimeSeries,
+    pitcherVulnerability: [],
+    upcomingGames: [],
+    splits: {
+      overview: [
+        { label: "Overall HR/G", hrPerGame },
+        { label: "Home HR/G", hrPerGame: homeHrPerGame },
+        { label: "Away HR/G", hrPerGame: awayHrPerGame },
+      ],
+      homeAway: [
+        { label: "Home HR/G", hrPerGame: homeHrPerGame },
+        { label: "Away HR/G", hrPerGame: awayHrPerGame },
+      ],
+      lhpRhp: [],
+      monthly,
+    },
+    games: gamesTable,
+  };
+
+  return response;
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const teamIdParam = searchParams.get("teamId");
+  const teamIdAlt = searchParams.get("team_id");
   const seasonParam = searchParams.get("season");
   const splitParam = searchParams.get("split") ?? "overall";
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
 
-  const teamId = teamIdParam ? Number(teamIdParam) : Number.NaN;
-  if (!teamIdParam || Number.isNaN(teamId)) {
-    return NextResponse.json(
-      { error: "teamId query param is required and must be a number" },
-      { status: 400 },
-    );
-  }
-
-  const season = seasonParam ? Number(seasonParam) : undefined;
-  if (seasonParam && Number.isNaN(season)) {
+  const seasonParsed = seasonParam ? Number(seasonParam) : undefined;
+  if (seasonParam && Number.isNaN(seasonParsed)) {
     return NextResponse.json(
       { error: "season must be a number when provided" },
       { status: 400 },
     );
   }
+  const seasonValue = typeof seasonParsed === "number" ? seasonParsed : 2024;
+  const season = seasonParam ? seasonValue : undefined;
 
   const fromDate = parseDate(fromParam);
   const toDate = parseDate(toParam);
@@ -110,6 +300,43 @@ export async function GET(req: NextRequest) {
   if (toParam && toDate === null) {
     return NextResponse.json(
       { error: "to must be a valid date (YYYY-MM-DD)" },
+      { status: 400 },
+    );
+  }
+
+  const mode = (process.env.HOTBAT_BACKEND ?? "auto").toLowerCase();
+  const rawTeamId = (teamIdAlt ?? teamIdParam ?? "").trim();
+  if (!rawTeamId) {
+    return NextResponse.json({ error: "teamId query param is required" }, { status: 400 });
+  }
+
+  if (mode === "csv" || (teamIdAlt && mode !== "db")) {
+    const csv = await loadTeamDashboardFromCsv({
+      teamId: rawTeamId,
+      season: seasonValue,
+      from: fromDate === null ? undefined : fromDate,
+      to: toDate === null ? undefined : toDate,
+      splitKey: splitParam,
+    });
+    if (!csv) return NextResponse.json({ error: "Team not found" }, { status: 404 });
+    return NextResponse.json(csv, { status: 200, headers: { "x-hotbat-source": "csv" } });
+  }
+
+  const teamId = Number(rawTeamId);
+  if (Number.isNaN(teamId)) {
+    if (mode === "auto") {
+      const csv = await loadTeamDashboardFromCsv({
+        teamId: rawTeamId,
+        season: seasonValue,
+        from: fromDate === null ? undefined : fromDate,
+        to: toDate === null ? undefined : toDate,
+        splitKey: splitParam,
+      });
+      if (!csv) return NextResponse.json({ error: "Team not found" }, { status: 404 });
+      return NextResponse.json(csv, { status: 200, headers: { "x-hotbat-source": "csv" } });
+    }
+    return NextResponse.json(
+      { error: "teamId must be a valid integer when HOTBAT_BACKEND=db" },
       { status: 400 },
     );
   }

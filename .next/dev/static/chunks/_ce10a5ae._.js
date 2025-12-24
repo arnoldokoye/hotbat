@@ -593,12 +593,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-const seasons = [
-    "2025",
-    "2024",
-    "2023"
-];
-function TopNav() {
+function TopNav({ dbSeasons }) {
     _s();
     const [theme, setTheme] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
         "TopNav.useState": ()=>{
@@ -640,7 +635,7 @@ function TopNav() {
                                 children: "☰"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 38,
+                                lineNumber: 40,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -648,7 +643,7 @@ function TopNav() {
                                 children: "HB"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 46,
+                                lineNumber: 48,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -660,7 +655,7 @@ function TopNav() {
                                         children: "HotBat"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                                        lineNumber: 50,
+                                        lineNumber: 52,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -668,19 +663,19 @@ function TopNav() {
                                         children: "Team HR insights"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                                        lineNumber: 56,
+                                        lineNumber: 58,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 49,
+                                lineNumber: 51,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                        lineNumber: 37,
+                        lineNumber: 39,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -689,36 +684,47 @@ function TopNav() {
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                 className: "sr-only",
                                 htmlFor: "season-select",
-                                children: "Season"
+                                children: "Season (DB)"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 63,
+                                lineNumber: 65,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
                                 id: "season-select",
-                                defaultValue: seasons[0],
+                                defaultValue: dbSeasons.length ? String(dbSeasons[dbSeasons.length - 1]) : "",
                                 className: "min-w-[8rem]",
-                                children: seasons.map((season)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                        value: season,
-                                        children: [
-                                            "Season ",
-                                            season
-                                        ]
-                                    }, season, true, {
+                                disabled: !dbSeasons.length,
+                                children: [
+                                    dbSeasons.length ? null : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                        value: "",
+                                        children: "No DB seasons"
+                                    }, void 0, false, {
                                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                                        lineNumber: 72,
-                                        columnNumber: 15
-                                    }, this))
-                            }, void 0, false, {
+                                        lineNumber: 74,
+                                        columnNumber: 40
+                                    }, this),
+                                    dbSeasons.map((season)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                            value: String(season),
+                                            children: [
+                                                "Season ",
+                                                season
+                                            ]
+                                        }, season, true, {
+                                            fileName: "[project]/src/components/layout/TopNav.tsx",
+                                            lineNumber: 76,
+                                            columnNumber: 15
+                                        }, this))
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 66,
+                                lineNumber: 68,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                        lineNumber: 62,
+                        lineNumber: 64,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -733,7 +739,7 @@ function TopNav() {
                                 children: theme === "dark" ? "Light mode" : "Dark mode"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 80,
+                                lineNumber: 84,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -746,7 +752,7 @@ function TopNav() {
                                 children: theme === "dark" ? "☀" : "☾"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 89,
+                                lineNumber: 93,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -758,19 +764,19 @@ function TopNav() {
                                 children: "AL"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                lineNumber: 99,
+                                lineNumber: 103,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                        lineNumber: 79,
+                        lineNumber: 83,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                lineNumber: 36,
+                lineNumber: 38,
                 columnNumber: 7
             }, this),
             isMobileNavOpen ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -786,7 +792,7 @@ function TopNav() {
                                     children: "Navigation"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/layout/TopNav.tsx",
-                                    lineNumber: 115,
+                                    lineNumber: 119,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -796,13 +802,13 @@ function TopNav() {
                                     children: "Close"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/layout/TopNav.tsx",
-                                    lineNumber: 116,
+                                    lineNumber: 120,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/layout/TopNav.tsx",
-                            lineNumber: 114,
+                            lineNumber: 118,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -814,7 +820,7 @@ function TopNav() {
                                             children: section.title
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/layout/TopNav.tsx",
-                                            lineNumber: 127,
+                                            lineNumber: 131,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -829,7 +835,7 @@ function TopNav() {
                                                                 children: link.label
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                                lineNumber: 139,
+                                                                lineNumber: 143,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -837,13 +843,13 @@ function TopNav() {
                                                                 children: "→"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                                lineNumber: 140,
+                                                                lineNumber: 144,
                                                                 columnNumber: 29
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                        lineNumber: 134,
+                                                        lineNumber: 138,
                                                         columnNumber: 27
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                         type: "button",
@@ -853,7 +859,7 @@ function TopNav() {
                                                                 children: link.label
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                                lineNumber: 147,
+                                                                lineNumber: 151,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -861,51 +867,51 @@ function TopNav() {
                                                                 children: "→"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                                lineNumber: 148,
+                                                                lineNumber: 152,
                                                                 columnNumber: 29
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                        lineNumber: 143,
+                                                        lineNumber: 147,
                                                         columnNumber: 27
                                                     }, this)
                                                 }, link.label, false, {
                                                     fileName: "[project]/src/components/layout/TopNav.tsx",
-                                                    lineNumber: 132,
+                                                    lineNumber: 136,
                                                     columnNumber: 23
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/layout/TopNav.tsx",
-                                            lineNumber: 130,
+                                            lineNumber: 134,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, section.title, true, {
                                     fileName: "[project]/src/components/layout/TopNav.tsx",
-                                    lineNumber: 126,
+                                    lineNumber: 130,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/TopNav.tsx",
-                            lineNumber: 124,
+                            lineNumber: 128,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/layout/TopNav.tsx",
-                    lineNumber: 113,
+                    lineNumber: 117,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/layout/TopNav.tsx",
-                lineNumber: 112,
+                lineNumber: 116,
                 columnNumber: 9
             }, this) : null
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/layout/TopNav.tsx",
-        lineNumber: 35,
+        lineNumber: 37,
         columnNumber: 5
     }, this);
 }

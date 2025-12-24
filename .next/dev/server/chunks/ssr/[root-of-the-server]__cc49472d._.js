@@ -53,8 +53,15 @@ async function fetchHrPicks(date, baseUrl) {
         cache: "no-store"
     });
     if (!res.ok) {
+        const isExpected = res.headers.get("x-hotbat-error") === "1" || res.status >= 500;
         const body = await res.json().catch(()=>null);
         const message = body?.error ?? `Failed to fetch HR picks: ${res.status}`;
+        if (isExpected) {
+            return {
+                date,
+                picks: []
+            };
+        }
         throw new Error(message);
     }
     return await res.json();
@@ -139,7 +146,8 @@ async function PicksPage({ searchParams }) {
             picks: []
         };
     } catch (error) {
-        console.error("hr-picks page fetch error", error);
+        // Leave noisy logging to the server; keep client console clean for expected failures.
+        console.warn("hr-picks page fetch warning", error);
         picksData = {
             date: effectiveDate,
             picks: []
@@ -150,7 +158,7 @@ async function PicksPage({ searchParams }) {
         latestDate: latestDate
     }, void 0, false, {
         fileName: "[project]/src/app/picks/page.tsx",
-        lineNumber: 45,
+        lineNumber: 46,
         columnNumber: 10
     }, this);
 }

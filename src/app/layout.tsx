@@ -5,6 +5,7 @@ import { SidebarNav } from "@/components/layout/SidebarNav";
 import { TopNav } from "@/components/layout/TopNav";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { FavoritesProvider } from "@/context/FavoritesContext";
+import { getDbSeasons } from "@/lib/dataAvailability";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,11 +23,13 @@ export const metadata: Metadata = {
   description: "HotBat team HR analytics dashboard",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const dbSeasons = await getDbSeasons();
+
   return (
     <html lang="en">
       <body
@@ -34,7 +37,7 @@ export default function RootLayout({
       >
         <FavoritesProvider>
           <div className="flex min-h-screen flex-col">
-            <TopNav />
+            <TopNav dbSeasons={dbSeasons} />
             <div className="flex flex-1 flex-col md:flex-row">
               <SidebarNav />
               <main className="flex-1 bg-white/50 py-6 dark:bg-slate-950">

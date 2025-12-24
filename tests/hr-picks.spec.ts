@@ -1,16 +1,35 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type APIRequestContext } from "@playwright/test";
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:3100";
 
-test.describe("HR Picks", () => {
-  test("shows picks for seeded slate", async ({ page }) => {
-    if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("...")) {
-      test.skip(true, "DATABASE_URL not set or placeholder; skipping HR picks DB-backed test.");
+async function getLatestBaselineDate(request: APIRequestContext) {
+  try {
+    const res = await request.get(`${BASE_URL}/data/player_game_baseline.csv`);
+    if (!res.ok()) return null;
+    const text = await res.text();
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) return null;
+    const header = lines[0].split(",");
+    const dateIdx = header.indexOf("game_date");
+    if (dateIdx === -1) return null;
+    let latest = "";
+    for (const line of lines.slice(1)) {
+      const cols = line.split(",");
+      const d = (cols[dateIdx] ?? "").trim();
+      if (d && d > latest) latest = d;
     }
+    return latest || null;
+  } catch {
+    return null;
+  }
+}
 
-    const apiRes = await page.request.get(`${BASE_URL}/api/hr-picks?date=2024-06-15`);
-    const apiJson = await apiRes.json();
-    const apiPicks = apiJson.picks ?? [];
+test.describe("HR Picks", () => {
+  test("shows picks for available slate", async ({ page }) => {
+    const baselineDate = await getLatestBaselineDate(page.request);
+    if (!baselineDate) {
+      test.skip(true, "No baseline CSV found at /data/player_game_baseline.csv; skipping.");
+    }
 
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
@@ -25,30 +44,27 @@ test.describe("HR Picks", () => {
     });
     page.on("pageerror", (err) => pageErrors.push(err.message));
 
-    await page.goto(`${BASE_URL}/picks?date=2024-06-15`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE_URL}/picks?date=${baselineDate}`, { waitUntil: "networkidle" });
 
     await expect(page.getByRole("heading", { name: /HR Picks/i })).toBeVisible();
 
-    if (apiPicks.length === 0) {
-      await expect(page.getByTestId("hr-picks-empty")).toBeVisible();
-    } else {
-      const list = page.getByTestId("hr-picks-list");
-      await expect(list).toBeVisible();
-      const firstCard = page.getByTestId(/hr-pick-card-/).first();
-      await expect(firstCard).toBeVisible();
-      await firstCard.getByTestId(/hr-pick-view-/).click();
-      await expect(page.getByTestId("hr-pick-drawer")).toBeVisible();
-      await expect(page.getByTestId("hr-pick-drawer")).toContainText(/Pick Score/i);
-      await page.getByTestId("hr-pick-drawer").getByText(/Close/).click();
-    }
+    const list = page.getByTestId("hr-picks-list");
+    await expect(list).toBeVisible();
+    const firstCard = page.getByTestId(/hr-pick-card-/).first();
+    await expect(firstCard).toBeVisible();
+    await firstCard.getByTestId(/hr-pick-view-/).click();
+    await expect(page.getByTestId("hr-pick-drawer")).toBeVisible();
+    await expect(page.getByTestId("hr-pick-drawer")).toContainText(/Pick Score/i);
+    await page.getByTestId("hr-pick-drawer").getByText(/Close/).click();
 
     expect(consoleErrors, "Console errors should be empty").toEqual([]);
     expect(pageErrors, "Page errors should be empty").toEqual([]);
   });
 
-  test("shows empty state for off-season date", async ({ page }) => {
-    if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("...")) {
-      test.skip(true, "DATABASE_URL not set or placeholder; skipping HR picks DB-backed test.");
+  test("invalid date snaps to latest CSV date", async ({ page }) => {
+    const baselineDate = await getLatestBaselineDate(page.request);
+    if (!baselineDate) {
+      test.skip(true, "No baseline CSV found at /data/player_game_baseline.csv; skipping.");
     }
 
     const consoleErrors: string[] = [];
@@ -64,14 +80,16 @@ test.describe("HR Picks", () => {
 
     await page.goto(`${BASE_URL}/picks?date=1999-01-01`, { waitUntil: "networkidle" });
     await expect(page.getByRole("heading", { name: /HR Picks/i })).toBeVisible();
-    await expect(page.getByTestId("hr-picks-empty")).toBeVisible();
+    await expect(page.getByTestId("hr-picks-date")).toHaveValue(baselineDate);
+    await expect(page.getByTestId("hr-picks-list")).toBeVisible();
 
     expect(consoleErrors, "Console errors should be empty").toEqual([]);
   });
 
   test("compare two picks", async ({ page }) => {
-    if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("...")) {
-      test.skip(true, "DATABASE_URL not set or placeholder; skipping HR picks DB-backed test.");
+    const baselineDate = await getLatestBaselineDate(page.request);
+    if (!baselineDate) {
+      test.skip(true, "No baseline CSV found at /data/player_game_baseline.csv; skipping.");
     }
 
     const consoleErrors: string[] = [];
@@ -85,11 +103,11 @@ test.describe("HR Picks", () => {
       }
     });
 
-    await page.goto(`${BASE_URL}/picks?date=2024-06-15`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE_URL}/picks?date=${baselineDate}`, { waitUntil: "networkidle" });
     const cards = page.getByTestId(/hr-pick-card-/);
     const count = await cards.count();
     if (count < 2) {
-      test.skip(true, "Not enough picks to compare on seeded date.");
+      test.skip(true, "Not enough picks to compare on selected date.");
     }
 
     const firstCompare = cards.nth(0).getByTestId(/hr-pick-compare-/);

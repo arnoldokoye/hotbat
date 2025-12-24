@@ -5,7 +5,7 @@ import { useFavorites } from "@/context/FavoritesContext";
 
 type NavLink = { label: string; href?: string };
 
-export const navSections: { title: string; links: NavLink[] } = [
+export const navSections: { title: string; links: NavLink[] }[] = [
   {
     title: "Teams",
     links: [

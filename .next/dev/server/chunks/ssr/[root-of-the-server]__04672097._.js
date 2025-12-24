@@ -83,9 +83,13 @@ function resolveBaseUrl(explicit) {
 }
 async function fetchPlayerDashboard(params) {
     await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$utils$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["simulateNetworkLatency"])();
-    const { playerId, season = 2024, split = "overall" } = params;
+    const { season = 2024, split = "overall" } = params;
     const search = new URLSearchParams();
-    search.set("playerId", String(playerId));
+    if ("player_id" in params) {
+        search.set("player_id", params.player_id);
+    } else {
+        search.set("playerId", String(params.playerId));
+    }
     search.set("season", String(season));
     if (split) search.set("split", split);
     const url = new URL("/api/player-dashboard", resolveBaseUrl());
@@ -100,8 +104,9 @@ async function fetchPlayerDashboard(params) {
         throw new Error(message);
     }
     const apiData = await res.json();
+    const stablePlayerId = res.headers.get("x-hotbat-source") === "csv" && "player_id" in params ? params.player_id : String(apiData.playerInfo.id);
     const playerInfo = {
-        playerId: String(apiData.playerInfo.id),
+        playerId: stablePlayerId,
         name: `${apiData.playerInfo.firstName} ${apiData.playerInfo.lastName}`,
         teamName: apiData.playerInfo.team.name,
         teamLogoUrl: apiData.playerInfo.team.logoUrl ?? (apiData.playerInfo.team.abbrev ? `/team-logos/${apiData.playerInfo.team.abbrev.toLowerCase()}.svg` : "/team-logos/default.svg"),
@@ -151,12 +156,27 @@ async function fetchPlayerDashboard(params) {
             parkHrFactor: p.parkHrFactor ?? 1,
             id: `park-${idx}`
         })) ?? [];
+    const asBaseline = apiData.baseline;
+    const cleanNumber = (v, allowZero = true)=>{
+        const num = typeof v === "number" ? v : Number.NaN;
+        if (!Number.isFinite(num)) return null;
+        if (!allowZero && num === 0) return null;
+        return num;
+    };
+    const baseline = asBaseline ? {
+        hrProb: cleanNumber(asBaseline.hrProb),
+        expectedHr: cleanNumber(asBaseline.expectedHr),
+        seasonHr: cleanNumber(asBaseline.seasonHr, true),
+        seasonPa: cleanNumber(asBaseline.seasonPa, true),
+        notes: asBaseline.notes
+    } : undefined;
     return {
         playerInfo,
         playerKeyMetrics,
         playerHrTimeSeries,
         pitchDamageRows: [],
         parkProfileRows,
+        baseline,
         splits: {
             overview: splitsOverview,
             homeAway: [],

@@ -135,7 +135,12 @@ export async function fetchTeamDashboard(params: {
   } = params;
 
   const url = new URL("/api/team-dashboard", resolveBaseUrl(baseUrl));
-  url.searchParams.set("teamId", String(teamId));
+  const teamIdString = String(teamId).trim();
+  if (/^\d+$/.test(teamIdString)) {
+    url.searchParams.set("teamId", teamIdString);
+  } else {
+    url.searchParams.set("team_id", teamIdString);
+  }
   if (season !== undefined) url.searchParams.set("season", String(season));
   if (split) url.searchParams.set("split", split);
   if (from) url.searchParams.set("from", from);

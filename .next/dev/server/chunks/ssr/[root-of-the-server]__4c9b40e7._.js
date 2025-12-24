@@ -40,7 +40,9 @@ function PickDetailsDrawer({ pick, onClose }) {
         onClose
     ]);
     if (!pick) return null;
-    const fmtNum = (value, digits = 3)=>typeof value === "number" && !Number.isNaN(value) ? value.toFixed(digits) : "—";
+    const fmtPct = (value, digits = 1)=>typeof value === "number" && Number.isFinite(value) ? `${(value * 100).toFixed(digits)}%` : "—";
+    const fmtNum = (value, digits = 3)=>typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : "—";
+    const matchupLabel = pick.matchup_advantage === "positive" ? "Advantage" : pick.matchup_advantage === "negative" ? "Disadvantage" : "Neutral";
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         "data-testid": "hr-pick-drawer",
         className: "fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 py-6 md:items-center",
@@ -59,25 +61,25 @@ function PickDetailsDrawer({ pick, onClose }) {
                                     children: "HR Pick Details"
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 35,
+                                    lineNumber: 43,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "text-lg font-semibold text-slate-900 dark:text-slate-50",
                                     children: [
-                                        pick.playerName,
+                                        pick.player_name,
                                         " · ",
-                                        pick.teamAbbrev
+                                        pick.team_name
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 38,
+                                    lineNumber: 46,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                            lineNumber: 34,
+                            lineNumber: 42,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -87,13 +89,13 @@ function PickDetailsDrawer({ pick, onClose }) {
                             children: "Close"
                         }, void 0, false, {
                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                            lineNumber: 42,
+                            lineNumber: 50,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                    lineNumber: 33,
+                    lineNumber: 41,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -109,37 +111,12 @@ function PickDetailsDrawer({ pick, onClose }) {
                                             children: "Pick Score"
                                         }, void 0, false, {
                                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                            lineNumber: 53,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-xl font-semibold text-slate-900 dark:text-slate-50",
-                                            children: pick.pickScore.toFixed(1)
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                            lineNumber: 56,
-                                            columnNumber: 15
-                                        }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 52,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "text-right",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400",
-                                            children: "HotBat Score"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
                                             lineNumber: 61,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-xl font-semibold text-slate-900 dark:text-slate-50",
-                                            children: pick.hotbatScore.toFixed(1)
+                                            children: pick.pick_score.toLocaleString()
                                         }, void 0, false, {
                                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
                                             lineNumber: 64,
@@ -150,99 +127,260 @@ function PickDetailsDrawer({ pick, onClose }) {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
                                     lineNumber: 60,
                                     columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "text-right",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400",
+                                            children: "Baseline Score"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                            lineNumber: 69,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xl font-semibold text-slate-900 dark:text-slate-50",
+                                            children: pick.baseline_score.toFixed(6)
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                            lineNumber: 72,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 68,
+                                    columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                            lineNumber: 51,
+                            lineNumber: 59,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400",
-                                    children: "Reasons"
+                                    children: "Top reasons"
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 71,
+                                    lineNumber: 79,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
                                     className: "mt-1 list-disc space-y-1 pl-5",
-                                    children: pick.reasons.map((reason, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                    children: pick.top_reasons.map((reason, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                             children: reason
-                                        }, `${pick.playerId}-reason-${idx}`, false, {
+                                        }, `${pick.player_id}-reason-${idx}`, false, {
                                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                            lineNumber: 76,
+                                            lineNumber: 84,
                                             columnNumber: 17
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 74,
+                                    lineNumber: 82,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                            lineNumber: 70,
+                            lineNumber: 78,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "rounded-md border border-slate-100 px-3 py-2 text-sm dark:border-slate-800",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400",
+                                    children: "How calculated"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 90,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "mt-1 text-sm text-slate-700 dark:text-slate-200",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "font-semibold",
+                                            children: "baseline_hr_score"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                            lineNumber: 94,
+                                            columnNumber: 15
+                                        }, this),
+                                        " =",
+                                        " ",
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "font-mono",
+                                            children: "hr_rate_last_50"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                            lineNumber: 95,
+                                            columnNumber: 15
+                                        }, this),
+                                        " ×",
+                                        " ",
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "font-mono",
+                                            children: "park_hr_factor"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                            lineNumber: 96,
+                                            columnNumber: 15
+                                        }, this),
+                                        " ×",
+                                        " ",
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "font-mono",
+                                            children: "expected_pa"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                            lineNumber: 97,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 93,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "mt-2 text-xs text-slate-500 dark:text-slate-400",
+                                    children: "Pitcher matchup signals are shown for context but are not applied to the baseline score yet."
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 99,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                            lineNumber: 89,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "grid grid-cols-2 gap-3",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
-                                    label: "Park",
-                                    value: pick.parkName ?? "—"
+                                    label: "Game date",
+                                    value: pick.game_date
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 82,
+                                    lineNumber: 105,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Park",
+                                    value: pick.park_name
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 106,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
                                     label: "Park HR Factor",
-                                    value: fmtNum(pick.parkHrFactor, 2)
+                                    value: fmtNum(pick.park_hr_factor, 2)
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 83,
+                                    lineNumber: 107,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
-                                    label: "HR/PA",
-                                    value: fmtNum(pick.hrPerPa, 3)
+                                    label: "Expected PA",
+                                    value: fmtNum(pick.expected_pa, 1)
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 84,
+                                    lineNumber: 108,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
-                                    label: "Season HR",
-                                    value: pick.seasonHr ?? 0
+                                    label: "Last 50 HR%",
+                                    value: fmtPct(pick.hr_rate_last_50)
                                 }, void 0, false, {
                                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                                    lineNumber: 85,
+                                    lineNumber: 109,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Season HR%",
+                                    value: fmtPct(pick.season_hr_rate)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 110,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Season HR total",
+                                    value: pick.season_hr_total
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 111,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Opposing pitcher",
+                                    value: pick.opposing_pitcher_name ? `${pick.opposing_pitcher_name}${pick.opposing_pitcher_hand ? ` (${pick.opposing_pitcher_hand})` : ""}` : "—"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 112,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Pitcher HR%",
+                                    value: fmtPct(pick.pitcher_hr_rate_allowed)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 120,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Pitcher HR total",
+                                    value: pick.pitcher_hr_total_allowed ?? "—"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 121,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Batter hand",
+                                    value: pick.batter_hand
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 125,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Detail, {
+                                    label: "Matchup",
+                                    value: matchupLabel
+                                }, void 0, false, {
+                                    fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
+                                    lineNumber: 126,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                            lineNumber: 81,
+                            lineNumber: 104,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                    lineNumber: 50,
+                    lineNumber: 58,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-            lineNumber: 32,
+            lineNumber: 40,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-        lineNumber: 26,
+        lineNumber: 34,
         columnNumber: 5
     }, this);
 }
@@ -255,7 +393,7 @@ function Detail({ label, value }) {
                 children: label
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                lineNumber: 96,
+                lineNumber: 137,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -263,13 +401,13 @@ function Detail({ label, value }) {
                 children: value
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-                lineNumber: 97,
+                lineNumber: 138,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/features/hr-picks/components/PickDetailsDrawer.tsx",
-        lineNumber: 95,
+        lineNumber: 136,
         columnNumber: 5
     }, this);
 }
@@ -286,7 +424,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 function PickComparePanel({ picks, onClear }) {
     if (!picks.length) return null;
-    const fmt = (v, digits = 3)=>typeof v === "number" && !Number.isNaN(v) ? v.toFixed(digits) : "—";
+    const fmtPct = (v, digits = 1)=>typeof v === "number" && Number.isFinite(v) ? `${(v * 100).toFixed(digits)}%` : "—";
+    const fmtNum = (v, digits = 3)=>typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "—";
+    const matchupLabel = (v)=>v === "positive" ? "Advantage" : v === "negative" ? "Disadvantage" : "Neutral";
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         "data-testid": "hr-picks-compare-panel",
         className: "rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900",
@@ -301,7 +441,7 @@ function PickComparePanel({ picks, onClear }) {
                                 children: "Compare Picks"
                             }, void 0, false, {
                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                lineNumber: 23,
+                                lineNumber: 27,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -309,13 +449,13 @@ function PickComparePanel({ picks, onClear }) {
                                 children: "Side-by-side signals"
                             }, void 0, false, {
                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                lineNumber: 26,
+                                lineNumber: 30,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                        lineNumber: 22,
+                        lineNumber: 26,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -325,13 +465,13 @@ function PickComparePanel({ picks, onClear }) {
                         children: "Clear compare"
                     }, void 0, false, {
                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                        lineNumber: 28,
+                        lineNumber: 32,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                lineNumber: 21,
+                lineNumber: 25,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -346,24 +486,24 @@ function PickComparePanel({ picks, onClear }) {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-sm font-semibold text-slate-900 dark:text-slate-50",
-                                                children: p.playerName
+                                                children: p.player_name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                                lineNumber: 45,
+                                                lineNumber: 49,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-xs text-slate-500 dark:text-slate-400",
-                                                children: p.teamAbbrev
+                                                children: p.team_name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                                lineNumber: 48,
+                                                lineNumber: 52,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                        lineNumber: 44,
+                                        lineNumber: 48,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -374,79 +514,124 @@ function PickComparePanel({ picks, onClear }) {
                                                 children: "Pick Score"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                                lineNumber: 51,
+                                                lineNumber: 55,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-lg font-semibold text-slate-900 dark:text-slate-50",
-                                                children: p.pickScore.toFixed(1)
+                                                children: p.pick_score.toLocaleString()
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                                lineNumber: 54,
+                                                lineNumber: 58,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-[11px] text-slate-500 dark:text-slate-400",
-                                                children: [
-                                                    "HotBat ",
-                                                    p.hotbatScore.toFixed(1)
-                                                ]
-                                            }, void 0, true, {
+                                                children: p.game_date
+                                            }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                                lineNumber: 57,
+                                                lineNumber: 61,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                        lineNumber: 50,
+                                        lineNumber: 54,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                lineNumber: 43,
+                                lineNumber: 47,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
-                                        label: "Park HR Factor",
-                                        value: fmt(p.parkHrFactor, 2)
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                        lineNumber: 63,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
-                                        label: "HR/PA",
-                                        value: fmt(p.hrPerPa, 3)
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                        lineNumber: 64,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
-                                        label: "Season HR",
-                                        value: p.seasonHr ?? 0
+                                        label: "Last 50 HR%",
+                                        value: fmtPct(p.hr_rate_last_50)
                                     }, void 0, false, {
                                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
                                         lineNumber: 65,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
-                                        label: "Park",
-                                        value: p.parkName ?? "—"
+                                        label: "Season HR%",
+                                        value: fmtPct(p.season_hr_rate)
                                     }, void 0, false, {
                                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
                                         lineNumber: 66,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Season HR",
+                                        value: p.season_hr_total
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 67,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Park",
+                                        value: p.park_name
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 68,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Opp Pitcher",
+                                        value: p.opposing_pitcher_name ? `${p.opposing_pitcher_name}${p.opposing_pitcher_hand ? ` (${p.opposing_pitcher_hand})` : ""}` : "—"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 69,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Pitcher HR%",
+                                        value: fmtPct(p.pitcher_hr_rate_allowed)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 77,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Pitcher HR Total",
+                                        value: p.pitcher_hr_total_allowed ?? "—"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 78,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Matchup",
+                                        value: matchupLabel(p.matchup_advantage)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 79,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Park HR Factor",
+                                        value: fmtNum(p.park_hr_factor, 2)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 80,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Exp PA",
+                                        value: fmtNum(p.expected_pa, 1)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
+                                        lineNumber: 81,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                lineNumber: 62,
+                                lineNumber: 64,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -457,44 +642,44 @@ function PickComparePanel({ picks, onClear }) {
                                         children: "Top reasons"
                                     }, void 0, false, {
                                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                        lineNumber: 69,
+                                        lineNumber: 84,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
                                         className: "mt-1 list-disc space-y-1 pl-4 text-xs",
-                                        children: p.reasons.slice(0, 2).map((r, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                        children: p.top_reasons.slice(0, 2).map((r, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                 children: r
-                                            }, `${p.playerId}-cmp-reason-${idx}`, false, {
+                                            }, `${p.player_id}-cmp-reason-${idx}`, false, {
                                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                                lineNumber: 74,
+                                                lineNumber: 89,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                        lineNumber: 72,
+                                        lineNumber: 87,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                                lineNumber: 68,
+                                lineNumber: 83,
                                 columnNumber: 13
                             }, this)
                         ]
-                    }, p.playerId, true, {
+                    }, p.player_id, true, {
                         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                        lineNumber: 39,
+                        lineNumber: 43,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                lineNumber: 37,
+                lineNumber: 41,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-        lineNumber: 17,
+        lineNumber: 21,
         columnNumber: 5
     }, this);
 }
@@ -506,7 +691,7 @@ function Metric({ label, value }) {
                 children: label
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                lineNumber: 88,
+                lineNumber: 103,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -514,13 +699,13 @@ function Metric({ label, value }) {
                 children: value
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-                lineNumber: 91,
+                lineNumber: 106,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/features/hr-picks/components/PickComparePanel.tsx",
-        lineNumber: 87,
+        lineNumber: 102,
         columnNumber: 5
     }, this);
 }
@@ -543,14 +728,19 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$features$2f$hr$2d$pic
 ;
 ;
 ;
-function HrPicksPage({ initialData, latestDate }) {
+function HrPicksPage({ initialData, latestDate, csvIndex, seasonMetadata }) {
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
-    const [selectedDate, setSelectedDate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(initialData.date || latestDate || "");
+    const seasons = csvIndex.seasons ?? [];
+    const datesBySeason = csvIndex.datesBySeason ?? {};
+    const initialDate = initialData.date && csvIndex.dates.includes(initialData.date) ? initialData.date : latestDate || "";
+    const [selectedDate, setSelectedDate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(initialDate);
     const [selectedPick, setSelectedPick] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [compareIds, setCompareIds] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
+    const selectedSeason = selectedDate ? Number.parseInt(selectedDate.slice(0, 4), 10) : seasons.length ? seasons[seasons.length - 1] : null;
+    const seasonDates = selectedSeason ? datesBySeason[selectedSeason] ?? [] : [];
     const picksById = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"])(()=>{
         const map = new Map();
-        initialData.picks.forEach((p)=>map.set(p.playerId, p));
+        initialData.picks.forEach((p)=>map.set(p.player_id, p));
         return map;
     }, [
         initialData.picks
@@ -577,6 +767,13 @@ function HrPicksPage({ initialData, latestDate }) {
         ]);
     };
     const hasPicks = initialData.picks.length > 0;
+    const seasonLabel = (season)=>{
+        const meta = seasonMetadata?.[season];
+        const badges = [];
+        if (meta?.covid_season) badges.push("COVID");
+        if (meta && meta.complete === false) badges.push("Partial");
+        return badges.length ? `${season} (${badges.join(", ")})` : `${season}`;
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
         className: "mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6",
         children: [
@@ -588,7 +785,7 @@ function HrPicksPage({ initialData, latestDate }) {
                         children: "HR Picks"
                     }, void 0, false, {
                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                        lineNumber: 54,
+                        lineNumber: 80,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -596,7 +793,15 @@ function HrPicksPage({ initialData, latestDate }) {
                         children: "Ranked, explainable HR candidates for the selected slate."
                     }, void 0, false, {
                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                        lineNumber: 55,
+                        lineNumber: 81,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-xs text-slate-500 dark:text-slate-400",
+                        children: "Historical / ML Data (CSV-backed). Date is the source of truth; season is derived from date."
+                    }, void 0, false, {
+                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                        lineNumber: 84,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -608,27 +813,101 @@ function HrPicksPage({ initialData, latestDate }) {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400",
-                                        children: "Date"
+                                        children: "Season"
                                     }, void 0, false, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 60,
+                                        lineNumber: 89,
                                         columnNumber: 13
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                        type: "date",
-                                        name: "date",
-                                        value: selectedDate,
-                                        onChange: (e)=>setSelectedDate(e.target.value),
-                                        className: "h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                                    }, void 0, false, {
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                        name: "season",
+                                        value: selectedSeason ?? "",
+                                        onChange: (e)=>{
+                                            const next = Number.parseInt(e.target.value, 10);
+                                            if (!Number.isFinite(next)) {
+                                                setSelectedDate("");
+                                                return;
+                                            }
+                                            const nextDates = datesBySeason[next] ?? [];
+                                            setSelectedDate(nextDates.length ? nextDates[nextDates.length - 1] : "");
+                                        },
+                                        className: "h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100",
+                                        disabled: !seasons.length,
+                                        "data-testid": "hr-picks-season",
+                                        children: [
+                                            seasons.length ? null : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "",
+                                                children: "No seasons"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                                lineNumber: 108,
+                                                columnNumber: 40
+                                            }, this),
+                                            seasons.map((s)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                    value: s,
+                                                    children: seasonLabel(s)
+                                                }, s, false, {
+                                                    fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                                    lineNumber: 110,
+                                                    columnNumber: 17
+                                                }, this))
+                                        ]
+                                    }, void 0, true, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 63,
+                                        lineNumber: 92,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                lineNumber: 59,
+                                lineNumber: 88,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                className: "flex items-center gap-2 text-slate-700 dark:text-slate-200",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400",
+                                        children: "Date"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 117,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                        name: "date",
+                                        value: selectedDate,
+                                        onChange: (e)=>setSelectedDate(e.target.value),
+                                        className: "h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100",
+                                        disabled: !seasonDates.length,
+                                        "data-testid": "hr-picks-date",
+                                        children: [
+                                            seasonDates.length ? null : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "",
+                                                children: "No dates"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                                lineNumber: 128,
+                                                columnNumber: 44
+                                            }, this),
+                                            seasonDates.map((d)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                    value: d,
+                                                    children: d
+                                                }, d, false, {
+                                                    fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                                    lineNumber: 130,
+                                                    columnNumber: 17
+                                                }, this))
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 120,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                lineNumber: 116,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -638,7 +917,7 @@ function HrPicksPage({ initialData, latestDate }) {
                                 children: "Load Picks"
                             }, void 0, false, {
                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                lineNumber: 71,
+                                lineNumber: 136,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -646,19 +925,19 @@ function HrPicksPage({ initialData, latestDate }) {
                                 children: selectedDate ? `Showing ${selectedDate}` : "No historical slates available yet."
                             }, void 0, false, {
                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                lineNumber: 78,
+                                lineNumber: 143,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                        lineNumber: 58,
+                        lineNumber: 87,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                lineNumber: 53,
+                lineNumber: 79,
                 columnNumber: 7
             }, this),
             comparePicks.length >= 2 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$features$2f$hr$2d$picks$2f$components$2f$PickComparePanel$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PickComparePanel"], {
@@ -666,7 +945,7 @@ function HrPicksPage({ initialData, latestDate }) {
                 onClear: ()=>setCompareIds([])
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                lineNumber: 85,
+                lineNumber: 150,
                 columnNumber: 9
             }, this),
             !selectedDate ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -675,15 +954,15 @@ function HrPicksPage({ initialData, latestDate }) {
                 children: "No historical slates available yet."
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                lineNumber: 89,
+                lineNumber: 154,
                 columnNumber: 9
             }, this) : hasPicks ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
                 className: "space-y-3",
                 "data-testid": "hr-picks-list",
-                children: initialData.picks.map((pick)=>{
-                    const selected = compareIds.includes(pick.playerId);
+                children: initialData.picks.map((pick, idx)=>{
+                    const selected = compareIds.includes(pick.player_id);
                     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("article", {
-                        "data-testid": `hr-pick-card-${pick.playerId}`,
+                        "data-testid": `hr-pick-card-${pick.player_id}`,
                         className: "rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -696,11 +975,11 @@ function HrPicksPage({ initialData, latestDate }) {
                                                 className: "flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-100",
                                                 children: [
                                                     "#",
-                                                    pick.rank
+                                                    idx + 1
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                lineNumber: 107,
+                                                lineNumber: 172,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -708,30 +987,30 @@ function HrPicksPage({ initialData, latestDate }) {
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                         className: "text-lg font-semibold text-slate-900 dark:text-slate-50",
-                                                        children: pick.playerName
+                                                        children: pick.player_name
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                        lineNumber: 111,
+                                                        lineNumber: 176,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                         className: "text-sm text-slate-600 dark:text-slate-300",
-                                                        children: pick.teamAbbrev
+                                                        children: pick.team_name
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                        lineNumber: 114,
+                                                        lineNumber: 179,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                lineNumber: 110,
+                                                lineNumber: 175,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 106,
+                                        lineNumber: 171,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -742,52 +1021,122 @@ function HrPicksPage({ initialData, latestDate }) {
                                                 children: "Pick Score"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                lineNumber: 118,
+                                                lineNumber: 183,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-2xl font-semibold text-slate-900 dark:text-slate-50",
-                                                children: pick.pickScore.toFixed(1)
+                                                children: pick.pick_score.toLocaleString()
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                lineNumber: 121,
+                                                lineNumber: 186,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-xs text-slate-500 dark:text-slate-400",
-                                                children: [
-                                                    "HotBat ",
-                                                    pick.hotbatScore.toFixed(1)
-                                                ]
-                                            }, void 0, true, {
+                                                children: pick.game_date
+                                            }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                lineNumber: 124,
+                                                lineNumber: 189,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 117,
+                                        lineNumber: 182,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                lineNumber: 105,
+                                lineNumber: 170,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
                                 className: "mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-200",
-                                children: pick.reasons.map((reason, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                children: pick.top_reasons.map((reason, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                         children: reason
-                                    }, `${pick.playerId}-reason-${idx}`, false, {
+                                    }, `${pick.player_id}-reason-${idx}`, false, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 131,
+                                        lineNumber: 194,
                                         columnNumber: 21
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                lineNumber: 129,
+                                lineNumber: 192,
+                                columnNumber: 17
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-4",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Last 50 HR%",
+                                        value: `${(pick.hr_rate_last_50 * 100).toFixed(1)}%`
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 199,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Season HR%",
+                                        value: `${(pick.season_hr_rate * 100).toFixed(1)}%`
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 203,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Season HR",
+                                        value: pick.season_hr_total
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 207,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Park",
+                                        value: pick.park_name
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 208,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Opp Pitcher",
+                                        value: pick.opposing_pitcher_name ? `${pick.opposing_pitcher_name}${pick.opposing_pitcher_hand ? ` (${pick.opposing_pitcher_hand})` : ""}` : "—"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 209,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Pitcher HR%",
+                                        value: pick.pitcher_hr_rate_allowed !== null ? `${(pick.pitcher_hr_rate_allowed * 100).toFixed(1)}%` : "—"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 217,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Park HR Factor",
+                                        value: pick.park_hr_factor.toFixed(2)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 225,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Metric, {
+                                        label: "Exp PA",
+                                        value: pick.expected_pa.toFixed(1)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                        lineNumber: 226,
+                                        columnNumber: 19
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                                lineNumber: 198,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -796,12 +1145,12 @@ function HrPicksPage({ initialData, latestDate }) {
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         type: "button",
                                         onClick: ()=>setSelectedPick(pick),
-                                        "data-testid": `hr-pick-view-${pick.playerId}`,
+                                        "data-testid": `hr-pick-view-${pick.player_id}`,
                                         className: "rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800",
                                         children: "View details"
                                     }, void 0, false, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 136,
+                                        lineNumber: 230,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -810,37 +1159,37 @@ function HrPicksPage({ initialData, latestDate }) {
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 type: "checkbox",
                                                 checked: selected,
-                                                onChange: ()=>toggleCompare(pick.playerId),
-                                                "data-testid": `hr-pick-compare-${pick.playerId}`,
+                                                onChange: ()=>toggleCompare(pick.player_id),
+                                                "data-testid": `hr-pick-compare-${pick.player_id}`,
                                                 className: "h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                                lineNumber: 145,
+                                                lineNumber: 239,
                                                 columnNumber: 21
                                             }, this),
                                             "Compare"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                        lineNumber: 144,
+                                        lineNumber: 238,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                                lineNumber: 135,
+                                lineNumber: 229,
                                 columnNumber: 17
                             }, this)
                         ]
-                    }, pick.playerId, true, {
+                    }, pick.player_id, true, {
                         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                        lineNumber: 100,
+                        lineNumber: 165,
                         columnNumber: 15
                     }, this);
                 })
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                lineNumber: 96,
+                lineNumber: 161,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 "data-testid": "hr-picks-empty",
@@ -848,7 +1197,7 @@ function HrPicksPage({ initialData, latestDate }) {
                 children: "No picks available for this date."
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                lineNumber: 160,
+                lineNumber: 254,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$features$2f$hr$2d$picks$2f$components$2f$PickDetailsDrawer$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PickDetailsDrawer"], {
@@ -856,13 +1205,39 @@ function HrPicksPage({ initialData, latestDate }) {
                 onClose: ()=>setSelectedPick(null)
             }, void 0, false, {
                 fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-                lineNumber: 168,
+                lineNumber: 262,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
-        lineNumber: 52,
+        lineNumber: 78,
+        columnNumber: 5
+    }, this);
+}
+function Metric({ label, value }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: "text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400",
+                children: label
+            }, void 0, false, {
+                fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                lineNumber: 270,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: "font-semibold text-slate-900 dark:text-slate-50",
+                children: value
+            }, void 0, false, {
+                fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+                lineNumber: 273,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/features/hr-picks/HrPicksPage.tsx",
+        lineNumber: 269,
         columnNumber: 5
     }, this);
 }

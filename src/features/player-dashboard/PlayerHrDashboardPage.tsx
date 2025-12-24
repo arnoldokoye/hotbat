@@ -14,6 +14,7 @@ import { PlayerPitchDamageCard } from "./components/PlayerPitchDamageCard";
 import { PlayerRecentFormCard } from "./components/PlayerRecentFormCard";
 import { PlayerSplitsCard } from "./components/PlayerSplitsCard";
 import { PlayerSplitHighlights } from "./components/PlayerSplitHighlights";
+import { PlayerBaselineCard } from "./components/PlayerBaselineCard";
 
 const metricOrder = ["HR", "xHR", "HR/PA", "Barrel%", "ISO", "HardHit%", "Avg EV"];
 
@@ -124,6 +125,15 @@ export function PlayerHrDashboardPage({ initialData }: { initialData: PlayerDash
             HR quality and contact profile
           </p>
         </div>
+        {initialData.baseline && (
+          <PlayerBaselineCard
+            hrProb={initialData.baseline.hrProb ?? null}
+            expectedHr={initialData.baseline.expectedHr ?? null}
+            seasonHr={initialData.baseline.seasonHr ?? null}
+            seasonPa={initialData.baseline.seasonPa ?? null}
+            notes={initialData.baseline.notes}
+          />
+        )}
         <PlayerKeyMetricsRow metrics={orderedMetrics} />
       </div>
 
