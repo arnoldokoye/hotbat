@@ -12,6 +12,7 @@ type PlayerPageProps = {
     player_id?: string;
     season?: string;
     split?: string;
+    date?: string;
   }>;
 };
 
@@ -28,6 +29,7 @@ export default async function PlayerPage({ searchParams }: PlayerPageProps) {
       ? Number(params.season)
       : 2024;
   const split = params?.split ?? "overall";
+  const date = params?.date?.trim() ?? "";
 
   if (!csvPlayerId && !params?.playerId) {
     const backend = (process.env.HOTBAT_BACKEND ?? "auto").toLowerCase();
@@ -48,7 +50,12 @@ export default async function PlayerPage({ searchParams }: PlayerPageProps) {
 
   const mode: "db" | "csv" = csvPlayerId ? "csv" : "db";
   const data = csvPlayerId
-    ? await fetchPlayerDashboard({ player_id: csvPlayerId, season, split })
+    ? await fetchPlayerDashboard({
+        player_id: csvPlayerId,
+        season,
+        split,
+        date: date || undefined,
+      })
     : await fetchPlayerDashboard({ playerId, season, split });
 
   const csvSeasons = mode === "csv" ? await discoverDailyLogsSeasons() : [];
@@ -69,6 +76,9 @@ export default async function PlayerPage({ searchParams }: PlayerPageProps) {
           season={season}
           split={split}
           seasonOptions={csvSeasons}
+          availableDates={data.availableDates}
+          availableMonths={data.availableMonths}
+          currentDate={data.effectiveDate ?? date}
         />
       </div>
       <PlayerHrDashboardPage initialData={data} />

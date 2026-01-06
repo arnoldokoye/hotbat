@@ -1,25 +1,18 @@
-import type { PlayerHrTimePoint } from "../mock/playerDashboardData";
-
 type RecentFormProps = {
-  recentGames: PlayerHrTimePoint[];
-  summary: {
-    recentHrTotal: number;
-    recentXhrTotal: number;
-    currentHrStreak: number;
+  recentForm?: {
+    last10PA: { hr: number; pa: number; rate: number | null } | null;
+    last25PA: { hr: number; pa: number; rate: number | null } | null;
+    last50PA: { hr: number; pa: number; rate: number | null } | null;
   };
 };
 
-export function PlayerRecentFormCard({ recentGames, summary }: RecentFormProps) {
-  const formatDateLine = (g: PlayerHrTimePoint) => {
-    const date = new Date(g.date);
-    const dateLabel = date.toLocaleDateString("en", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    return `${dateLabel} vs ${g.opponentTeamName}`;
-  };
-
+export function PlayerRecentFormCard({ recentForm }: RecentFormProps) {
+  const windows = [
+    { label: "Last 10 PA", data: recentForm?.last10PA ?? null },
+    { label: "Last 25 PA", data: recentForm?.last25PA ?? null },
+    { label: "Last 50 PA", data: recentForm?.last50PA ?? null },
+  ];
+  const hasAny = windows.some((w) => w.data !== null);
   return (
     <div
       data-testid="player-recent-form-card"
@@ -30,52 +23,38 @@ export function PlayerRecentFormCard({ recentGames, summary }: RecentFormProps) 
           <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
             Streaks & Recent Form
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Last 5 games</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            HR Total
-          </p>
-          <p className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
-            {summary.recentHrTotal}
-          </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            xHR {summary.recentXhrTotal.toFixed(1)}
+            Recent form by PA window
           </p>
         </div>
       </div>
 
-      <div className="mb-3 flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-        <span className="font-medium">Current HR streak</span>
-        <span className="text-base font-semibold">{summary.currentHrStreak} game(s)</span>
-      </div>
-
-      {recentGames.length === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">No recent games available.</p>
+      {!hasAny ? (
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          No recent form available for the selected date.
+        </p>
       ) : (
-        <ul className="space-y-2">
-          {recentGames.map((g) => (
-            <li
-              key={`${g.date}-${g.opponentTeamName}-${g.parkName}`}
+        <div className="space-y-2">
+          {windows.map(({ label, data }) => (
+            <div
+              key={label}
               className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2 text-sm dark:border-slate-800"
             >
               <div className="flex flex-col">
-                <span className="font-medium text-slate-900 dark:text-slate-50">
-                  {formatDateLine(g)}
+                <span className="font-medium text-slate-900 dark:text-slate-50">{label}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {data ? `${data.hr} HR / ${data.pa} PA` : "Insufficient PA"}
                 </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">{g.parkName}</span>
               </div>
               <div className="text-right">
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  HR {g.hr}
+                  {data?.rate !== null ? `${(data.rate * 100).toFixed(1)}%` : "—"}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  xHR {g.xHr?.toFixed(1) ?? "—"}
-                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">HR/PA</p>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

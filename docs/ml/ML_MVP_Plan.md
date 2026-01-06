@@ -28,6 +28,11 @@
   - Default out-dir is `scripts/ml/data/` (raw + processed + reports).
   - Keep large files out of git or git-ignored; document paths.
 
+## CSV-first dashboards (MVP)
+- `/api/player-dashboard` and `/api/team-dashboard` run CSV-first in auto mode, falling back to DB only when CSV data is missing or empty.
+- Player/team recent form windows are derived from PA-level `plays.csv` (last 10/25/50 PA, season-scoped, date-anchored).
+- Handedness splits (vs LHP/RHP) and park factors are Retrosheet-based estimates (no Statcast).
+
 ## Dataset versioning
 - Each data or model change bumps a dataset version (e.g., v0.1.0).
 - Record changes in `docs/ml/ML_CHANGELOG.md` with date, version, summary, and verification steps.

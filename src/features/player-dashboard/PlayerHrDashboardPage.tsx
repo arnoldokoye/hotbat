@@ -164,31 +164,10 @@ export function PlayerHrDashboardPage({ initialData }: { initialData: PlayerDash
             Streaks & Recent Form
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Quick view of the last five games
+            Recent PA windows for the selected date
           </p>
         </div>
-        <PlayerRecentFormCard
-          recentGames={[...initialData.playerHrTimeSeries]
-            .sort((a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf())
-            .slice(0, 5)}
-          summary={(() => {
-            const sorted = [...initialData.playerHrTimeSeries].sort(
-              (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf(),
-            );
-            const recent = sorted.slice(0, 5);
-            const recentHrTotal = recent.reduce((sum, g) => sum + (g.hr ?? 0), 0);
-            const recentXhrTotal = recent.reduce((sum, g) => sum + (g.xHr ?? 0), 0);
-            let currentHrStreak = 0;
-            for (const g of sorted) {
-              if ((g.hr ?? 0) > 0) {
-                currentHrStreak += 1;
-              } else {
-                break;
-              }
-            }
-            return { recentHrTotal, recentXhrTotal, currentHrStreak };
-          })()}
-        />
+        <PlayerRecentFormCard recentForm={initialData.recentForm} />
       </div>
 
       <div className="mt-6 space-y-3">

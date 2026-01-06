@@ -38,9 +38,10 @@ hr_rate_last_50 FLOAT
 season_hr_rate FLOAT
 season_hr INT
 season_pa INT
+season_games INT
+avg_pa_per_game FLOAT
 pitcher_hr_allowed_rate_last_50 FLOAT
 park_hr_factor FLOAT
-expected_pa FLOAT
 
 baseline_hr_score FLOAT
 
@@ -56,9 +57,10 @@ baseline_hr_score FLOAT
 | season_hr_rate | Long-term baseline |
 | season_hr | Season HR total (to date) |
 | season_pa | Season PA total (to date) |
+| season_games | Season games played (to date) |
+| avg_pa_per_game | Player-specific avg PA/G (season_pa / season_games) |
 | pitcher_hr_allowed_rate_last_50 | Pitcher recent HR/PA allowed |
 | park_hr_factor | Park boost/suppress |
-| expected_pa | Opportunity |
 | baseline_hr_score | Final ranking signal |
 
 ---

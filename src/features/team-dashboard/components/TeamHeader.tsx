@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
 import { TeamInfo } from "../mock/teamDashboardData";
+import { TeamSelector } from "./TeamSelector";
 
 type TeamHeaderProps = {
   teamInfo: TeamInfo;
@@ -87,7 +88,12 @@ export function TeamHeader({
         </div>
       </CardHeader>
       <CardBody className="px-6 pb-6">
-        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <TeamSelector
+            currentTeamId={teamInfo.teamId}
+            season={season}
+            split={split}
+          />
           <Select
             label="Season"
             value={season}

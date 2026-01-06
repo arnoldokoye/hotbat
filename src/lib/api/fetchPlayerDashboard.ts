@@ -11,6 +11,9 @@ import type {
 } from "@/features/player-dashboard/mock/playerDashboardData";
 
 export type PlayerDashboardResponse = {
+  availableDates?: string[];
+  availableMonths?: string[];
+  effectiveDate?: string;
   playerInfo: {
     id: number;
     firstName: string;
@@ -43,6 +46,7 @@ export type PlayerDashboardResponse = {
       season: number;
       gamesPlayed: number;
       hr: number;
+      pa?: number;
       xHr: number | null;
       hrPerPa: number | null;
       barrelRate: number | null;
@@ -51,6 +55,15 @@ export type PlayerDashboardResponse = {
       hardHitRate: number | null;
     }
   >;
+  handednessSplits?: {
+    vsLHP: { hr: number; pa: number; rate: number | null } | null;
+    vsRHP: { hr: number; pa: number; rate: number | null } | null;
+  };
+  recentForm?: {
+    last10PA: { hr: number; pa: number; rate: number | null } | null;
+    last25PA: { hr: number; pa: number; rate: number | null } | null;
+    last50PA: { hr: number; pa: number; rate: number | null } | null;
+  };
   hrTimeSeries: {
     date: string;
     gameId: number;
@@ -99,6 +112,11 @@ export type PlayerDashboardData = {
   };
   gameLog: PlayerGameLogRow[];
   hrEvents: PlayerHrEventRow[];
+  availableDates?: string[];
+  availableMonths?: string[];
+  effectiveDate?: string;
+  recentForm?: PlayerDashboardResponse["recentForm"];
+  handednessSplits?: PlayerDashboardResponse["handednessSplits"];
   filters: {
     defaultSeason: string;
     defaultSplit: string;
@@ -110,6 +128,7 @@ export type PlayerDashboardData = {
 export type PlayerDashboardParams = {
   season?: number;
   split?: string;
+  date?: string;
 } & ({ playerId: number } | { player_id: string });
 
 function resolveBaseUrl(explicit?: string) {
@@ -142,6 +161,7 @@ export async function fetchPlayerDashboard(
   }
   search.set("season", String(season));
   if (split) search.set("split", split);
+  if (params.date) search.set("date", params.date);
 
   const url = new URL("/api/player-dashboard", resolveBaseUrl());
   url.search = search.toString();
@@ -209,14 +229,27 @@ export async function fetchPlayerDashboard(
     k: 0,
   }));
 
-  const splitsOverview: PlayerSplitRow[] = Object.entries(apiData.splits).map(
-    ([key, s]) => ({
-      label: key,
-      hr: s.hr,
-      pa: s.hrPerPa && s.hrPerPa > 0 ? Math.round(s.hr / s.hrPerPa) : 0,
-      hrPerPa: s.hrPerPa ?? 0,
-    }),
-  );
+  const splitRow = (label: string, s: PlayerDashboardResponse["splits"][string]): PlayerSplitRow => ({
+    label,
+    hr: s.hr,
+    pa: s.pa ?? (s.hrPerPa && s.hrPerPa > 0 ? Math.round(s.hr / s.hrPerPa) : 0),
+    hrPerPa: s.hrPerPa ?? null,
+  });
+
+  const splitsOverview: PlayerSplitRow[] = apiData.splits.overall
+    ? [splitRow("Overall", apiData.splits.overall)]
+    : [];
+  const splitsHomeAway: PlayerSplitRow[] = [
+    apiData.splits.home ? splitRow("Home", apiData.splits.home) : null,
+    apiData.splits.away ? splitRow("Away", apiData.splits.away) : null,
+  ].filter(Boolean) as PlayerSplitRow[];
+  const splitsLhpRhp: PlayerSplitRow[] = [
+    apiData.splits.lhp ? splitRow("vs LHP", apiData.splits.lhp) : null,
+    apiData.splits.rhp ? splitRow("vs RHP", apiData.splits.rhp) : null,
+  ].filter(Boolean) as PlayerSplitRow[];
+  const splitsMonthly: PlayerSplitRow[] = Object.entries(apiData.splits)
+    .filter(([key]) => key.startsWith("month:"))
+    .map(([key, s]) => splitRow(key.replace("month:", ""), s));
 
   const parkProfileRows: ParkProfileRow[] =
     apiData.parkProfile?.map((p, idx) => ({
@@ -254,12 +287,17 @@ export async function fetchPlayerDashboard(
     baseline,
     splits: {
       overview: splitsOverview,
-      homeAway: [],
-      lhpRhp: [],
-      monthly: [],
+      homeAway: splitsHomeAway,
+      lhpRhp: splitsLhpRhp,
+      monthly: splitsMonthly,
     },
     gameLog,
     hrEvents: [],
+    availableDates: apiData.availableDates,
+    availableMonths: apiData.availableMonths,
+    effectiveDate: apiData.effectiveDate,
+    recentForm: apiData.recentForm,
+    handednessSplits: apiData.handednessSplits,
     filters: {
       defaultSeason: String(season),
       defaultSplit: split,

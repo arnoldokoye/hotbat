@@ -22,6 +22,7 @@ export type CompareHRPick = {
   hr_rate_last_10: number | null;
   season_hr_rate: number;
   season_hr_total: number;
+  season_pa?: number;
 
   // Pitcher matchup
   opposing_pitcher_name: string | null;
@@ -45,6 +46,16 @@ export type CompareHRPick = {
     expected_pa: number;
   };
   top_reasons: string[];
+
+  // ML explainability (optional, additive)
+  top_signal?: string | null;
+  player_recent_hr_rate?: number | null;
+  pitcher_recent_hr_allowed_rate?: number | null;
+  matchup_rate?: number | null;
+  confidence_label?: string | null;
+  movement_note?: string | null;
+  today_edge_note?: string | null;
+  stability_label?: string | null;
 };
 
 export type HrPicksBaselineResponse = {
@@ -52,4 +63,3 @@ export type HrPicksBaselineResponse = {
   picks: CompareHRPick[];
   availableDates: string[];
 };
-

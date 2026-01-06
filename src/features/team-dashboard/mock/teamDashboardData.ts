@@ -4,6 +4,7 @@ export type TeamInfo = {
   teamLogoUrl: string;
   league: string;
   division: string;
+  parkFactor?: number;
 };
 
 export type TeamKeyMetric = {
@@ -71,6 +72,8 @@ export type TeamHrTimePoint = {
   xHr: number;
   avgEv: number;
   barrels: number;
+  opponent?: string;
+  opposingSp?: string;
 };
 
 export type PitcherRow = {

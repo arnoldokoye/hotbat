@@ -45,7 +45,7 @@ export type PlayerSplitRow = {
   label: string;
   hr: number;
   pa: number;
-  hrPerPa: number;
+  hrPerPa: number | null;
 };
 
 export type PlayerGameLogRow = {

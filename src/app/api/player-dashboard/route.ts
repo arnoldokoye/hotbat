@@ -3,10 +3,16 @@ import { prisma } from "@/lib/prisma";
 import { loadBallparks } from "@/lib/csv/ballparks";
 import { loadDailyBatting } from "@/lib/csv/dailyBatting";
 import { loadDailyPitchingStartersByGame } from "@/lib/csv/dailyPitching";
+import { loadDailyPlays } from "@/lib/csv/dailyPlays";
+import { loadDailyTeamStats } from "@/lib/csv/dailyTeamStats";
+import { buildParkFactorMap } from "@/lib/csv/parkFactors";
 import { loadPlayerRegistry } from "@/lib/csv/playerRegistry";
 import { loadTeams } from "@/lib/csv/teams";
 
 type PlayerDashboardResponse = {
+  availableDates?: string[];
+  availableMonths?: string[];
+  effectiveDate?: string;
   parkProfile?: {
     parkName: string;
     hrAtPark: number;
@@ -18,6 +24,7 @@ type PlayerDashboardResponse = {
     expectedHr?: number;
     seasonHr?: number;
     seasonPa?: number;
+    avgPaPerGame?: number;
     notes?: string;
   };
   playerInfo: {
@@ -45,6 +52,7 @@ type PlayerDashboardResponse = {
       season: number;
       gamesPlayed: number;
       hr: number;
+      pa?: number;
       xHr: number | null;
       hrPerPa: number | null;
       barrelRate: number | null;
@@ -53,6 +61,15 @@ type PlayerDashboardResponse = {
       hardHitRate: number | null;
     }
   >;
+  handednessSplits?: {
+    vsLHP: { hr: number; pa: number; rate: number | null } | null;
+    vsRHP: { hr: number; pa: number; rate: number | null } | null;
+  };
+  recentForm?: {
+    last10PA: { hr: number; pa: number; rate: number | null } | null;
+    last25PA: { hr: number; pa: number; rate: number | null } | null;
+    last50PA: { hr: number; pa: number; rate: number | null } | null;
+  };
   hrTimeSeries: {
     date: string;
     gameId: number;
@@ -71,7 +88,7 @@ type PlayerDashboardResponse = {
     xHr: number | null;
     avgEv: number | null;
   }[];
-    upcomingGames: unknown[];
+  upcomingGames: unknown[];
 };
 
 const logoPath = (abbrev?: string | null) => {
@@ -97,6 +114,10 @@ function isoDateToTimestamp(value: string): string {
   return `${value}T00:00:00.000Z`;
 }
 
+function isIsoDateString(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value.trim());
+}
+
 function hash32FNV1a(input: string): number {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i += 1) {
@@ -111,20 +132,48 @@ function safeDiv(numer: number, denom: number): number | null {
   return numer / denom;
 }
 
+type RecentFormWindow = { hr: number; pa: number; rate: number | null };
+type RecentForm = {
+  last10PA: RecentFormWindow | null;
+  last25PA: RecentFormWindow | null;
+  last50PA: RecentFormWindow | null;
+};
+
+function buildRecentForm(events: { hr: number }[]): RecentForm {
+  const windowStats = (window: number): RecentFormWindow | null => {
+    if (events.length < window) return null;
+    const slice = events.slice(events.length - window);
+    const hr = slice.reduce((sum, e) => sum + e.hr, 0);
+    const pa = slice.length;
+    const rate = safeDiv(hr, pa);
+    return { hr, pa, rate };
+  };
+
+  return {
+    last10PA: windowStats(10),
+    last25PA: windowStats(25),
+    last50PA: windowStats(50),
+  };
+}
+
 async function loadPlayerDashboardFromCsv(args: {
   playerId: string;
   season: number;
   splitKey: string;
+  date?: string;
 }): Promise<PlayerDashboardResponse | null> {
-  const { playerId, season, splitKey: _splitKey } = args;
+  const { playerId, season, splitKey: _splitKey, date } = args;
   void _splitKey;
 
-  const [battingRows, startersByGame, players, teams, parks] = await Promise.all([
+  const [battingRows, startersByGame, players, teams, parks, teamStats, paEvents] =
+    await Promise.all([
     loadDailyBatting(season),
     loadDailyPitchingStartersByGame(season),
     loadPlayerRegistry(),
     loadTeams().catch(() => []),
     loadBallparks().catch(() => new Map<string, string>()),
+    loadDailyTeamStats(season).catch(() => []),
+    loadDailyPlays(season).catch(() => []),
   ]);
 
   const playerById = new Map(players.map((p) => [p.player_id, p] as const));
@@ -208,7 +257,32 @@ async function loadPlayerDashboardFromCsv(args: {
     return a.gid.localeCompare(b.gid);
   });
 
-  const latestGame = games.length ? games[games.length - 1] : null;
+  if (!games.length) return null;
+
+  const availableDates = Array.from(new Set(games.map((g) => g.date))).sort();
+  const availableMonths = Array.from(new Set(availableDates.map((d) => d.slice(0, 7)))).sort();
+
+  let effectiveDate = availableDates.length ? availableDates[availableDates.length - 1] : null;
+  const requestedDate = date?.trim() ?? "";
+  if (requestedDate && isIsoDateString(requestedDate)) {
+    if (availableDates.includes(requestedDate)) {
+      effectiveDate = requestedDate;
+    } else if (availableDates.length) {
+      let matched: string | null = null;
+      for (let i = availableDates.length - 1; i >= 0; i -= 1) {
+        if (availableDates[i] <= requestedDate) {
+          matched = availableDates[i];
+          break;
+        }
+      }
+      effectiveDate = matched ?? availableDates[0];
+    }
+  }
+
+  const gamesForMetrics =
+    effectiveDate !== null ? games.filter((g) => g.date <= effectiveDate) : games;
+
+  const latestGame = gamesForMetrics.length ? gamesForMetrics[gamesForMetrics.length - 1] : null;
   const teamId = latestGame?.team ?? "";
   const teamName = teamNameById.get(teamId) ?? teamId;
 
@@ -216,7 +290,7 @@ async function loadPlayerDashboardFromCsv(args: {
   const lastName = playerMeta.last_name ?? playerMeta.player_name.split(" ").slice(1).join(" ") ?? "";
   const bats = playerMeta.bats ?? "R";
 
-  const totals = games.reduce(
+  const totals = gamesForMetrics.reduce(
     (acc, g) => {
       acc.hr += g.hr;
       acc.pa += g.pa;
@@ -233,12 +307,13 @@ async function loadPlayerDashboardFromCsv(args: {
 
   const seasonHr = totals.hr;
   const seasonPa = totals.pa;
+  const gamesPlayed = games.length;
+  const avgPaPerGame = gamesPlayed > 0 ? seasonPa / gamesPlayed : 0;
   const hrProb = safeDiv(seasonHr, seasonPa) ?? 0;
-  const projectedPa = 4.0;
-  const expectedHr = hrProb * projectedPa;
+  const expectedHr = hrProb * avgPaPerGame;
 
-  const computeSplit = (filter: (g: GameAgg) => boolean) => {
-    const subset = games.filter(filter);
+  const computeSplit = (filter: (g: GameAgg) => boolean, minPaForRate = 0) => {
+    const subset = gamesForMetrics.filter(filter);
     const sum = subset.reduce(
       (acc, g) => {
         acc.hr += g.hr;
@@ -251,12 +326,14 @@ async function loadPlayerDashboardFromCsv(args: {
       { hr: 0, pa: 0, ab: 0, doubles: 0, triples: 0 },
     );
     const gamesPlayed = subset.length;
+    const hrPerPa = sum.pa >= minPaForRate ? safeDiv(sum.hr, sum.pa) : null;
     return {
       season,
       gamesPlayed,
       hr: sum.hr,
+      pa: sum.pa,
       xHr: null as number | null,
-      hrPerPa: safeDiv(sum.hr, sum.pa),
+      hrPerPa,
       barrelRate: null as number | null,
       avgEv: null as number | null,
       iso: safeDiv(sum.doubles + 2 * sum.triples + 3 * sum.hr, sum.ab),
@@ -268,12 +345,12 @@ async function loadPlayerDashboardFromCsv(args: {
     overall: computeSplit(() => true),
     home: computeSplit((g) => g.vishome === "h"),
     away: computeSplit((g) => g.vishome === "v"),
-    lhp: computeSplit((g) => g.opposingStarterThrows === "L"),
-    rhp: computeSplit((g) => g.opposingStarterThrows === "R"),
+    lhp: computeSplit((g) => g.opposingStarterThrows === "L", 30),
+    rhp: computeSplit((g) => g.opposingStarterThrows === "R", 30),
   };
 
   // Monthly splits (YYYY-MM).
-  for (const g of games) {
+  for (const g of gamesForMetrics) {
     const monthKey = `month:${g.date.slice(0, 7)}`;
     if (!splits[monthKey]) {
       splits[monthKey] = computeSplit((x) => x.date.slice(0, 7) === g.date.slice(0, 7));
@@ -290,7 +367,7 @@ async function loadPlayerDashboardFromCsv(args: {
     { label: "HardHit%", value: null },
   ];
 
-  const gamesDesc = [...games].sort((a, b) => {
+  const gamesDesc = [...gamesForMetrics].sort((a, b) => {
     if (a.date !== b.date) return b.date.localeCompare(a.date);
     return b.gid.localeCompare(a.gid);
   });
@@ -318,22 +395,49 @@ async function loadPlayerDashboardFromCsv(args: {
     avgEv: null,
   }));
 
-  const parkAgg = games.reduce<Record<string, { hr: number; pa: number }>>((acc, g) => {
-    const parkName = parks.get(g.site) ?? g.site ?? "Unknown Park";
-    acc[parkName] ??= { hr: 0, pa: 0 };
-    acc[parkName].hr += g.hr;
-    acc[parkName].pa += g.pa;
-    return acc;
-  }, {});
+  const parkFactors = buildParkFactorMap(teamStats);
+  const parkAgg = gamesForMetrics.reduce<Record<string, { hr: number; pa: number; site: string }>>(
+    (acc, g) => {
+      const key = g.site || "Unknown";
+      acc[key] ??= { hr: 0, pa: 0, site: key };
+      acc[key].hr += g.hr;
+      acc[key].pa += g.pa;
+      return acc;
+    },
+    {},
+  );
 
-  const parkProfile = Object.entries(parkAgg).map(([parkName, agg]) => ({
-    parkName,
+  const parkProfile = Object.values(parkAgg).map((agg) => ({
+    parkName: parks.get(agg.site) ?? agg.site ?? "Unknown Park",
     hrAtPark: agg.hr,
     hrPerPaAtPark: agg.pa > 0 ? agg.hr / agg.pa : 0,
-    parkHrFactor: null,
+    parkHrFactor: parkFactors.get(agg.site) ?? 1,
   }));
 
+  const playerPaEvents = paEvents.filter(
+    (e) => e.batter_id === playerId && (!effectiveDate || e.date <= effectiveDate),
+  );
+  const recentForm = buildRecentForm(playerPaEvents);
+
+  const vsLhp = splits.lhp;
+  const vsRhp = splits.rhp;
+  const handednessSplits = {
+    vsLHP:
+      vsLhp.pa && vsLhp.pa >= 30
+        ? { hr: vsLhp.hr, pa: vsLhp.pa, rate: vsLhp.hrPerPa }
+        : null,
+    vsRHP:
+      vsRhp.pa && vsRhp.pa >= 30
+        ? { hr: vsRhp.hr, pa: vsRhp.pa, rate: vsRhp.hrPerPa }
+        : null,
+  };
+
   return {
+    availableDates,
+    availableMonths,
+    effectiveDate: effectiveDate ?? undefined,
+    recentForm,
+    handednessSplits,
     playerInfo: {
       id: 0,
       firstName,
@@ -360,8 +464,9 @@ async function loadPlayerDashboardFromCsv(args: {
       expectedHr,
       seasonHr,
       seasonPa,
+      avgPaPerGame,
       notes:
-        "Baseline: HR probability = season HR / season PA; Expected HR = HR probability × 4.0 PA window (deterministic).",
+        "Baseline: HR probability = season HR / season PA; Expected HR = HR probability × avg PA/G (player-specific).",
     },
   };
 }
@@ -373,6 +478,7 @@ export async function GET(req: NextRequest) {
     const playerIdAlt = searchParams.get("player_id");
     const seasonParam = searchParams.get("season");
     const splitParam = searchParams.get("split") ?? "overall";
+    const dateParam = searchParams.get("date") ?? undefined;
 
     const season = seasonParam ? Number(seasonParam) : 2024;
     const seasonValue = Number.isNaN(season) ? 2024 : season;
@@ -387,37 +493,34 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    if (mode === "csv" || (playerIdAlt && mode !== "db")) {
-      const csv = await loadPlayerDashboardFromCsv({
+    const tryCsv = async () =>
+      loadPlayerDashboardFromCsv({
         playerId: rawPlayerId,
         season: seasonValue,
         splitKey: splitParam,
+        date: dateParam,
       });
-      if (!csv) {
+
+    if (mode !== "db") {
+      try {
+        const csv = await tryCsv();
+        if (csv) {
+          console.info("player-dashboard backend=csv");
+          return NextResponse.json(csv, {
+            status: 200,
+            headers: { "x-hotbat-source": "csv" },
+          });
+        }
+      } catch (error) {
+        console.warn("player-dashboard csv fallback", error);
+      }
+      if (mode === "csv") {
         return NextResponse.json({ error: "Player not found" }, { status: 404 });
       }
-      return NextResponse.json(csv, {
-        status: 200,
-        headers: { "x-hotbat-source": "csv" },
-      });
     }
 
     const playerId = Number(rawPlayerId);
     if (Number.isNaN(playerId)) {
-      if (mode === "auto") {
-        const csv = await loadPlayerDashboardFromCsv({
-          playerId: rawPlayerId,
-          season: seasonValue,
-          splitKey: splitParam,
-        });
-        if (!csv) {
-          return NextResponse.json({ error: "Player not found" }, { status: 404 });
-        }
-        return NextResponse.json(csv, {
-          status: 200,
-          headers: { "x-hotbat-source": "csv" },
-        });
-      }
       return NextResponse.json(
         { error: "playerId must be a valid integer when HOTBAT_BACKEND=db" },
         { status: 400 },
@@ -543,9 +646,10 @@ export async function GET(req: NextRequest) {
 
     const seasonHr = summary?.hr ?? 0;
     const seasonPa = summary?.pa ?? 0;
+    const gamesPlayed = summary?.gamesPlayed ?? 0;
+    const avgPaPerGame = gamesPlayed > 0 ? seasonPa / gamesPlayed : 0;
     const hrProb = seasonPa > 0 ? seasonHr / seasonPa : 0;
-    const projectedPa = 4.0; // deterministic baseline window
-    const expectedHr = hrProb * projectedPa;
+    const expectedHr = hrProb * avgPaPerGame;
 
     const response: PlayerDashboardResponse = {
       playerInfo: {
@@ -574,8 +678,9 @@ export async function GET(req: NextRequest) {
         expectedHr,
         seasonHr,
         seasonPa,
+        avgPaPerGame,
         notes:
-          "Baseline: HR probability = season HR / season PA; Expected HR = HR probability × 4.0 PA window (deterministic).",
+          "Baseline: HR probability = season HR / season PA; Expected HR = HR probability × avg PA/G (player-specific).",
       },
     };
 

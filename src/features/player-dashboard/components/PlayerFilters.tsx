@@ -10,6 +10,9 @@ type PlayerFiltersProps = {
   season: number;
   split: string;
   seasonOptions?: number[];
+  availableDates?: string[];
+  availableMonths?: string[];
+  currentDate?: string;
 };
 
 const DEFAULT_DB_SEASONS = [2024];
@@ -22,9 +25,22 @@ export function PlayerFilters({
   season,
   split,
   seasonOptions,
+  availableDates,
+  availableMonths,
+  currentDate,
 }: PlayerFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const dates = availableDates ?? [];
+  const months =
+    availableMonths ??
+    Array.from(new Set(dates.map((d) => d.slice(0, 7)))).sort();
+  const selectedDate =
+    currentDate && dates.includes(currentDate) ? currentDate : dates[dates.length - 1] ?? "";
+  const selectedMonth =
+    selectedDate ? selectedDate.slice(0, 7) : months[months.length - 1] ?? "";
+  const monthDates = selectedMonth ? dates.filter((d) => d.startsWith(selectedMonth)) : dates;
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -35,13 +51,24 @@ export function PlayerFilters({
       params.delete("player_id");
       params.set("playerId", String(playerId));
     }
-    params.set(key, value);
+    if (key === "date") {
+      if (value) {
+        params.set("date", value);
+      } else {
+        params.delete("date");
+      }
+    } else {
+      params.set(key, value);
+    }
     // Preserve the other param: if updating season, keep split; if updating split, keep season.
     if (key === "season" && !params.get("split")) {
       params.set("split", split);
     }
     if (key === "split" && !params.get("season")) {
       params.set("season", String(season));
+    }
+    if (mode === "csv" && key === "season") {
+      params.delete("date");
     }
     router.replace(`/player?${params.toString()}`);
   };
@@ -78,6 +105,46 @@ export function PlayerFilters({
           </option>
         ))}
       </Select>
+
+      {mode === "csv" ? (
+        <>
+          <Select
+            value={selectedMonth}
+            onChange={(event) => {
+              const nextMonth = event.target.value;
+              const nextDates = dates.filter((d) => d.startsWith(nextMonth));
+              const nextDate = nextDates.length ? nextDates[nextDates.length - 1] : "";
+              updateParam("date", nextDate);
+            }}
+            className="w-36"
+            data-testid="player-month-selector"
+            aria-label="Player month selector"
+            disabled={!months.length}
+          >
+            {months.length ? null : <option value="">No months</option>}
+            {months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </Select>
+          <Select
+            value={selectedDate}
+            onChange={(event) => updateParam("date", event.target.value)}
+            className="w-40"
+            data-testid="player-date-selector"
+            aria-label="Player date selector"
+            disabled={!monthDates.length}
+          >
+            {monthDates.length ? null : <option value="">No dates</option>}
+            {monthDates.map((dateOption) => (
+              <option key={dateOption} value={dateOption}>
+                {dateOption}
+              </option>
+            ))}
+          </Select>
+        </>
+      ) : null}
     </div>
   );
 }

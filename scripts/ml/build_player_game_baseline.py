@@ -14,7 +14,9 @@ This script:
 - Materializes one row per (player_id, game_date) with explainable baseline score.
 
 Baseline HR Score formula (exact):
-baseline_hr_score = hr_rate_last_50 * park_hr_factor * expected_pa
+baseline_hr_score = hr_rate_last_50 * park_hr_factor * avg_pa_per_game
+
+Where avg_pa_per_game = season_pa / season_games (player-specific, not a constant).
 
 Hard constraints:
 - Do NOT modify existing PA or player-day scripts
@@ -72,7 +74,6 @@ class SlateRow:
   game_date: str
   park_id: str
   opposing_pitcher_id: str
-  expected_pa: float
 
 
 def read_batter_features(path: Path) -> Dict[Tuple[str, str], Dict[str, float]]:
@@ -110,7 +111,7 @@ def read_pitcher_features(path: Path) -> Dict[Tuple[str, str], Dict[str, float]]
   return out
 
 
-def read_slate(path: Path, default_expected_pa: float) -> List[SlateRow]:
+def read_slate(path: Path) -> List[SlateRow]:
   rows: List[SlateRow] = []
   with path.open(newline="", encoding="utf-8") as fh:
     reader = csv.DictReader(fh)
@@ -119,10 +120,6 @@ def read_slate(path: Path, default_expected_pa: float) -> List[SlateRow]:
       game_date = (r.get("game_date") or r.get("date") or "").strip()
       park_id = (r.get("park_id") or "").strip()
       opposing_pitcher_id = (r.get("opposing_pitcher_id") or r.get("pitcher_id") or r.get("pit_id") or "").strip()
-
-      expected_pa = to_float(r.get("expected_pa") or "")
-      if expected_pa <= 0.0:
-        expected_pa = default_expected_pa
 
       if not player_id or not is_valid_date(game_date):
         continue
@@ -137,10 +134,36 @@ def read_slate(path: Path, default_expected_pa: float) -> List[SlateRow]:
           game_date=game_date,
           park_id=park_id,
           opposing_pitcher_id=opposing_pitcher_id,
-          expected_pa=expected_pa,
         )
       )
   return rows
+
+
+def compute_season_games_by_player_date(slate: List[SlateRow]) -> Dict[Tuple[str, str], int]:
+  """
+  Compute cumulative season games played per player up to (but not including) each date.
+
+  For a row on date D, season_games = count of distinct game dates for this player
+  in the same season where game_date < D.
+
+  This is time-aware: no future leakage.
+  """
+  # Group slate rows by (player_id, season)
+  player_season_dates: Dict[Tuple[str, str], List[str]] = {}
+  for s in slate:
+    season = s.game_date[:4]  # YYYY from YYYY-MM-DD
+    key = (s.player_id, season)
+    player_season_dates.setdefault(key, []).append(s.game_date)
+
+  # For each player-season, sort dates and compute cumulative games
+  result: Dict[Tuple[str, str], int] = {}
+  for (player_id, season), dates in player_season_dates.items():
+    sorted_dates = sorted(set(dates))  # Unique dates, sorted
+    for i, date in enumerate(sorted_dates):
+      # Games played before this date = index (0-based count of prior dates)
+      result[(player_id, date)] = i
+
+  return result
 
 
 def read_player_registry(path: Path) -> Dict[str, str]:
@@ -192,7 +215,7 @@ def main() -> int:
     default=str(DEFAULT_SLATE),
     help="Path to REAL daily slate CSV (player_id, game_date, park_id, opposing_pitcher_id).",
   )
-  parser.add_argument("--expected-pa", type=float, default=4.2, help="Expected PA constant (default: 4.2)")
+  parser.add_argument("--fallback-pa", type=float, default=4.0, help="Fallback avg PA/G when season_games=0 (default: 4.0)")
   parser.add_argument("--out", default=str(DEFAULT_OUT_CSV), help="Output CSV path (default: scripts/ml/data/player_game_baseline.csv)")
   args = parser.parse_args()
 
@@ -219,7 +242,7 @@ def main() -> int:
   pitcher = read_pitcher_features(pitcher_path)
   # Park factors are not available yet; keep park_hr_factor = 1.00 as a documented placeholder.
   park_hr_factor = 1.0
-  slate = read_slate(slate_path, args.expected_pa)
+  slate = read_slate(slate_path)
   try:
     player_registry = read_player_registry(registry_path)
   except Exception as e:
@@ -229,6 +252,10 @@ def main() -> int:
   if not slate:
     print(f"ERROR: no valid slate rows read from {slate_path}", file=sys.stderr)
     return 1
+
+  # Compute cumulative season games per player-date for avg PA/G calculation.
+  season_games_lookup = compute_season_games_by_player_date(slate)
+  fallback_pa = args.fallback_pa
 
   missing_batter = 0
   missing_pitcher = 0
@@ -275,9 +302,14 @@ def main() -> int:
     if not s.park_id:
       null_park_id += 1
 
-    expected_pa = float(s.expected_pa)
+    # Compute player-specific avg PA/G from season stats.
+    season_games = season_games_lookup.get((s.player_id, s.game_date), 0)
+    if season_games > 0 and season_pa > 0:
+      avg_pa_per_game = season_pa / season_games
+    else:
+      avg_pa_per_game = fallback_pa
 
-    baseline_hr_score = hr_rate_last_50 * park_hr_factor * expected_pa
+    baseline_hr_score = hr_rate_last_50 * park_hr_factor * avg_pa_per_game
 
     out_rows.append(
       {
@@ -290,9 +322,10 @@ def main() -> int:
         "season_hr_rate": fmt_float(season_hr_rate),
         "season_hr": str(int(season_hr)) if season_hr.is_integer() else fmt_float(season_hr),
         "season_pa": str(int(season_pa)) if season_pa.is_integer() else fmt_float(season_pa),
+        "season_games": str(season_games),
+        "avg_pa_per_game": fmt_float(avg_pa_per_game),
         "pitcher_hr_allowed_rate_last_50": fmt_float(pitcher_rate_last_50),
         "park_hr_factor": fmt_float(park_hr_factor),
-        "expected_pa": fmt_float(expected_pa),
         "baseline_hr_score": fmt_float(baseline_hr_score),
       }
     )
@@ -338,9 +371,10 @@ def main() -> int:
     "season_hr_rate",
     "season_hr",
     "season_pa",
+    "season_games",
+    "avg_pa_per_game",
     "pitcher_hr_allowed_rate_last_50",
     "park_hr_factor",
-    "expected_pa",
     "baseline_hr_score",
   ]
   write_csv(out_path, fieldnames, out_rows)

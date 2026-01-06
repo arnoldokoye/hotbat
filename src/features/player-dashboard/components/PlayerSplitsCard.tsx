@@ -69,7 +69,7 @@ export function PlayerSplitsCard({
                       <Td className="text-slate-800 dark:text-slate-200">{row.hr}</Td>
                       <Td className="text-slate-800 dark:text-slate-200">{row.pa}</Td>
                       <Td className="text-slate-800 dark:text-slate-200">
-                        {row.hrPerPa.toFixed(3)}
+                        {row.hrPerPa !== null ? row.hrPerPa.toFixed(3) : "—"}
                       </Td>
                     </Tr>
                   ))}

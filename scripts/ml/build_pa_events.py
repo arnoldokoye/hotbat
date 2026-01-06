@@ -142,6 +142,10 @@ class ParsedPaEvent:
   pit_id: str
   bat_team_id: str
   pit_team_id: str
+  ballpark_id: str
+  pitcher_hand: str
+  is_home: str
+  pa_index_in_game: str
   event_cd: str
   inning: str
   outs: str
@@ -221,6 +225,10 @@ def _iter_pa_events_for_file(
         "pit_id": pit_id,
         "bat_team_id": bat_team_id,
         "pit_team_id": pit_team_id,
+        "ballpark_id": "",
+        "pitcher_hand": "",
+        "is_home": bat_home,
+        "pa_index_in_game": "",
         "event_cd": event_cd,
         "inning": inning,
         "outs": outs,
@@ -255,6 +263,10 @@ def _iter_pa_events_for_file(
         "pit_id": pit_id,
         "bat_team_id": "",
         "pit_team_id": "",
+        "ballpark_id": "",
+        "pitcher_hand": "",
+        "is_home": "",
+        "pa_index_in_game": "",
         "event_cd": event_cd,
         "inning": "",
         "outs": "",
@@ -293,6 +305,10 @@ def _iter_pa_events_for_file(
       "pit_id": pit_id,
       "bat_team_id": bat_team_id,
       "pit_team_id": pit_team_id,
+      "ballpark_id": "",
+      "pitcher_hand": "",
+      "is_home": bat_home,
+      "pa_index_in_game": "",
       "event_cd": event_cd,
       "inning": inning,
       "outs": outs,
@@ -320,6 +336,10 @@ def _iter_pa_events_for_file(
       pit_id=parsed["pit_id"],
       bat_team_id=parsed["bat_team_id"],
       pit_team_id=parsed["pit_team_id"],
+      ballpark_id=parsed["ballpark_id"],
+      pitcher_hand=parsed["pitcher_hand"],
+      is_home=parsed["is_home"],
+      pa_index_in_game=parsed["pa_index_in_game"] or str(next_seq),
       event_cd=parsed["event_cd"],
       inning=parsed["inning"],
       outs=parsed["outs"],
@@ -349,7 +369,21 @@ def _iter_pa_events_for_plays_file(
   reader: Iterable[List[str]],
   seq_by_game: Dict[str, int],
 ) -> Iterator[ParsedPaEvent]:
-  required = {"gid", "pn", "pa", "batter", "pitcher", "inning", "outs_pre", "vis_home", "batteam", "pitteam", "event"}
+  required = {
+    "gid",
+    "pn",
+    "pa",
+    "batter",
+    "pitcher",
+    "pithand",
+    "inning",
+    "outs_pre",
+    "vis_home",
+    "batteam",
+    "pitteam",
+    "event",
+    "site",
+  }
   missing = sorted(required - set(header_map.keys()))
   if missing:
     raise RuntimeError(f"{path}: plays.csv missing required columns: {missing}")
@@ -371,16 +405,23 @@ def _iter_pa_events_for_plays_file(
 
       bat_id = _get_idx(row, header_map["batter"])
       pit_id = _get_idx(row, header_map["pitcher"])
+      pitcher_hand = _get_idx(row, header_map["pithand"]).upper() or "?"
       bat_team_id = _get_idx(row, header_map["batteam"])
       pit_team_id = _get_idx(row, header_map["pitteam"])
+      ballpark_id = _get_idx(row, header_map["site"])
       inning = _to_int_str(_get_idx(row, header_map["inning"]))
       outs = _to_int_str(_get_idx(row, header_map["outs_pre"]))
       bat_home = _to_int_str(_get_idx(row, header_map["vis_home"]))
+      pa_index_in_game = _to_int_str(_get_idx(row, header_map["pn"]))
       event_tx = _get_idx(row, header_map["event"])
       event_cd = derive_event_cd_from_plays_row(row, header_map)
 
       if not bat_id or not pit_id:
         raise RuntimeError(f"{path}: missing batter/pitcher for gid={gid}, pn={pn}")
+      if not ballpark_id:
+        raise RuntimeError(f"{path}: missing site for gid={gid}, pn={pn}")
+      if not pa_index_in_game:
+        raise RuntimeError(f"{path}: missing pn for gid={gid}")
 
       yield ParsedPaEvent(
         game_id=gid,
@@ -392,6 +433,10 @@ def _iter_pa_events_for_plays_file(
         pit_id=pit_id,
         bat_team_id=bat_team_id,
         pit_team_id=pit_team_id,
+        ballpark_id=ballpark_id,
+        pitcher_hand=pitcher_hand,
+        is_home=bat_home,
+        pa_index_in_game=pa_index_in_game,
         event_cd=event_cd,
         inning=inning,
         outs=outs,
@@ -518,6 +563,14 @@ def main() -> int:
     "inning",
     "outs",
     "bat_home",
+    "player_id",
+    "team_id",
+    "opponent_team_id",
+    "ballpark_id",
+    "pitcher_id",
+    "pitcher_hand",
+    "is_home",
+    "pa_index_in_game",
   ]
   raw_fieldnames = [
     "pa_id",
@@ -533,6 +586,14 @@ def main() -> int:
     "inning",
     "outs",
     "bat_home",
+    "player_id",
+    "team_id",
+    "opponent_team_id",
+    "ballpark_id",
+    "pitcher_id",
+    "pitcher_hand",
+    "is_home",
+    "pa_index_in_game",
     "event_tx",
     "source_file",
     "source_row",
@@ -542,6 +603,8 @@ def main() -> int:
   raw_rows: List[Dict[str, str]] = []
   for r in events:
     season_str = str(r.season) if r.season else ""
+    is_home = r.is_home or r.bat_home
+    pa_index_in_game = r.pa_index_in_game or str(r.event_seq)
     processed_rows.append(
       {
         "pa_id": r.pa_id,
@@ -557,6 +620,14 @@ def main() -> int:
         "inning": r.inning,
         "outs": r.outs,
         "bat_home": r.bat_home,
+        "player_id": r.bat_id,
+        "team_id": r.bat_team_id,
+        "opponent_team_id": r.pit_team_id,
+        "ballpark_id": r.ballpark_id,
+        "pitcher_id": r.pit_id,
+        "pitcher_hand": r.pitcher_hand,
+        "is_home": is_home,
+        "pa_index_in_game": pa_index_in_game,
       }
     )
     raw_rows.append(
@@ -574,6 +645,14 @@ def main() -> int:
         "inning": r.inning,
         "outs": r.outs,
         "bat_home": r.bat_home,
+        "player_id": r.bat_id,
+        "team_id": r.bat_team_id,
+        "opponent_team_id": r.pit_team_id,
+        "ballpark_id": r.ballpark_id,
+        "pitcher_id": r.pit_id,
+        "pitcher_hand": r.pitcher_hand,
+        "is_home": is_home,
+        "pa_index_in_game": pa_index_in_game,
         "event_tx": r.event_tx,
         "source_file": r.source_file,
         "source_row": str(r.source_row),

@@ -39,12 +39,14 @@ export function PickComparePanel({ picks, onClear }: PickComparePanelProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {picks.map((p) => (
-          <div
-            key={p.player_id}
-            className="rounded-md border border-slate-100 p-3 dark:border-slate-800"
-          >
-            <div className="flex items-center justify-between">
+        {picks.map((p) => {
+          const hasSeasonStats = Boolean(p.season_pa && p.season_pa > 0);
+          return (
+            <div
+              key={p.player_id}
+              className="rounded-md border border-slate-100 p-3 dark:border-slate-800"
+            >
+              <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                   {p.player_name}
@@ -63,8 +65,8 @@ export function PickComparePanel({ picks, onClear }: PickComparePanelProps) {
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300">
               <Metric label="Last 50 HR%" value={fmtPct(p.hr_rate_last_50)} />
-              <Metric label="Season HR%" value={fmtPct(p.season_hr_rate)} />
-              <Metric label="Season HR" value={p.season_hr_total} />
+              <Metric label="Season HR%" value={hasSeasonStats ? fmtPct(p.season_hr_rate) : "—"} />
+              <Metric label="Season HR" value={hasSeasonStats ? p.season_hr_total : "—"} />
               <Metric label="Park" value={p.park_name} />
               <Metric
                 label="Opp Pitcher"
@@ -91,7 +93,8 @@ export function PickComparePanel({ picks, onClear }: PickComparePanelProps) {
               </ul>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

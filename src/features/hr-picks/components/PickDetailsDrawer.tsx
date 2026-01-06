@@ -29,6 +29,7 @@ export function PickDetailsDrawer({ pick, onClose }: PickDetailsDrawerProps) {
       : pick.matchup_advantage === "negative"
       ? "Disadvantage"
       : "Neutral";
+  const hasSeasonStats = Boolean(pick.season_pa && pick.season_pa > 0);
 
   return (
     <div
@@ -107,8 +108,8 @@ export function PickDetailsDrawer({ pick, onClose }: PickDetailsDrawerProps) {
             <Detail label="Park HR Factor" value={fmtNum(pick.park_hr_factor, 2)} />
             <Detail label="Expected PA" value={fmtNum(pick.expected_pa, 1)} />
             <Detail label="Last 50 HR%" value={fmtPct(pick.hr_rate_last_50)} />
-            <Detail label="Season HR%" value={fmtPct(pick.season_hr_rate)} />
-            <Detail label="Season HR total" value={pick.season_hr_total} />
+            <Detail label="Season HR%" value={hasSeasonStats ? fmtPct(pick.season_hr_rate) : "—"} />
+            <Detail label="Season HR total" value={hasSeasonStats ? pick.season_hr_total : "—"} />
             <Detail
               label="Opposing pitcher"
               value={

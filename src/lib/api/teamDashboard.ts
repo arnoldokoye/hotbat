@@ -18,6 +18,7 @@ export type TeamDashboardResponse = {
     league: string;
     division: string;
     logoUrl?: string;
+    parkFactor?: number;
   };
   keyMetrics: {
     id: string;
@@ -32,6 +33,8 @@ export type TeamDashboardResponse = {
     xHr?: number;
     avgEv?: number;
     barrels?: number;
+    opponent?: string;
+    opposingSp?: string;
   }[];
   pitcherVulnerability: {
     pitcherName: string;
@@ -57,6 +60,13 @@ export type TeamDashboardResponse = {
     homeAway: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
     lhpRhp: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
     monthly: { label: string; hrPerGame: number; leagueAvgHrPerGame?: number }[];
+    vsLHP?: { hr: number; pa: number; rate: number | null } | null;
+    vsRHP?: { hr: number; pa: number; rate: number | null } | null;
+  };
+  recentForm?: {
+    last10PA: { hr: number; pa: number; rate: number | null } | null;
+    last25PA: { hr: number; pa: number; rate: number | null } | null;
+    last50PA: { hr: number; pa: number; rate: number | null } | null;
   };
   games: {
     id: number;
@@ -83,8 +93,11 @@ export type TeamDashboardData = {
     homeAway: TeamSplitRow[];
     lhpRhp: TeamSplitRow[];
     monthly: TeamSplitRow[];
+    vsLHP?: TeamDashboardResponse["splits"]["vsLHP"];
+    vsRHP?: TeamDashboardResponse["splits"]["vsRHP"];
   };
   gameRows: GameRow[];
+  recentForm?: TeamDashboardResponse["recentForm"];
   filters: {
     defaultSeason: string;
     defaultSplit: string;
@@ -168,6 +181,7 @@ export async function fetchTeamDashboard(params: {
     teamLogoUrl,
     league: data.teamInfo.league,
     division: data.teamInfo.division,
+    parkFactor: data.teamInfo.parkFactor ?? undefined,
   };
 
   const teamKeyMetrics: TeamKeyMetric[] = (data.keyMetrics ?? []).map((metric) => ({
@@ -185,6 +199,8 @@ export async function fetchTeamDashboard(params: {
     xHr: point.xHr ?? point.hr,
     avgEv: point.avgEv ?? 0,
     barrels: point.barrels ?? 0,
+    opponent: point.opponent ?? "",
+    opposingSp: point.opposingSp ?? "",
   }));
 
   const pitcherRows: PitcherRow[] = (data.pitcherVulnerability ?? []).map((row) => ({
@@ -228,6 +244,8 @@ export async function fetchTeamDashboard(params: {
     homeAway: mapSplits(data.splits?.homeAway ?? []),
     lhpRhp: mapSplits(data.splits?.lhpRhp ?? []),
     monthly: mapSplits(data.splits?.monthly ?? []),
+    vsLHP: data.splits?.vsLHP ?? null,
+    vsRHP: data.splits?.vsRHP ?? null,
   };
 
   const gameRows: GameRow[] = (data.games ?? []).map((game) => ({
@@ -251,6 +269,7 @@ export async function fetchTeamDashboard(params: {
     upcomingGames,
     splits,
     gameRows,
+    recentForm: data.recentForm ?? undefined,
     filters: {
       defaultSeason: String(season ?? "2024"),
       defaultSplit: "Full Season",

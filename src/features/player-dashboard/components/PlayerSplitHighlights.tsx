@@ -35,15 +35,17 @@ function prettifyLabel(raw: string): string {
 
 function pickHighlights(rows: PlayerSplitRow[], prefix?: string): Highlight[] {
   if (!rows || rows.length === 0) return [];
-  const sorted = [...rows].sort((a, b) => b.hrPerPa - a.hrPerPa);
+  const filtered = rows.filter((row) => row.hrPerPa !== null);
+  if (!filtered.length) return [];
+  const sorted = [...filtered].sort((a, b) => (b.hrPerPa ?? 0) - (a.hrPerPa ?? 0));
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
   const highlights: Highlight[] = [];
   if (best) {
-    highlights.push({ label: prettifyLabel(best.label), value: best.hrPerPa });
+    highlights.push({ label: prettifyLabel(best.label), value: best.hrPerPa ?? 0 });
   }
   if (worst && worst !== best) {
-    highlights.push({ label: prettifyLabel(worst.label), value: worst.hrPerPa });
+    highlights.push({ label: prettifyLabel(worst.label), value: worst.hrPerPa ?? 0 });
   }
   return highlights;
 }

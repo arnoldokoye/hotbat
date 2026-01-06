@@ -54,6 +54,14 @@ When using older cwevent-derived CSVs:
 | `pit_id` | string | Retrosheet pitcher id |
 | `bat_team_id` | string | Batting team (`batteam` in daily logs; derived for older cwevent inputs) |
 | `pit_team_id` | string | Pitching/fielding team (`pitteam` in daily logs; derived for older cwevent inputs) |
+| `player_id` | string | Canonical batter id (alias of `bat_id`) |
+| `team_id` | string | Canonical batting team id (alias of `bat_team_id`) |
+| `opponent_team_id` | string | Canonical opponent team id (alias of `pit_team_id`) |
+| `ballpark_id` | string | Ballpark id (`site` in daily logs plays) |
+| `pitcher_id` | string | Canonical pitcher id (alias of `pit_id`) |
+| `pitcher_hand` | string | Pitcher throwing hand (`L`/`R`/`?`) |
+| `is_home` | int | 1 if batting team is home, 0 if visiting |
+| `pa_index_in_game` | int | Play number within game (`pn` in daily logs plays) |
 | `event_cd` | int | Retrosheet event code (e.g. `23` = HR) |
 | `inning` | int | Inning count if available, else empty |
 | `outs` | int | Outs before play if available, else empty |
@@ -95,6 +103,11 @@ Generated stats include:
 - `null_pa_id_count`
 - `hr_count`
 - `hr_rate`
+
+Note: The canonical ML v1 feature columns (`player_id`, `team_id`, `opponent_team_id`,
+`ballpark_id`, `pitcher_id`, `pitcher_hand`, `is_home`, `pa_index_in_game`) are fully
+populated when using daily logs `plays.csv`. Legacy cwevent-derived inputs may not supply
+these fields; ML v1 requires daily logs to satisfy the contract.
 
 When `--fail-on-invalid` is set, scripts exit non-zero if:
 - `duplicates_count > 0`, or

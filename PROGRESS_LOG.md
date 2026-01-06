@@ -270,3 +270,75 @@
 - Added CSV mode support to `GET /api/team-dashboard` (`src/app/api/team-dashboard/route.ts`): accepts Retrosheet team IDs via `team_id` (or non-numeric `teamId` in `auto`), computes HR/Game + game log + time series from `teamstats.csv` joined to `teams.csv` + `ballparks.csv`, and preserves existing DB behavior for numeric `teamId`.
 - Wired `/team` for CSV-first routing (`src/app/team/page.tsx`): supports `team_id` URLs and redirects `/team` (no params) to a deterministic CSV default when `HOTBAT_BACKEND` is not `db`, while keeping DB-backed `teamId=<number>` paths intact.
 - Updated `src/lib/api/teamDashboard.ts` to send `team_id` query params when the caller provides a non-numeric team ID (Retrosheet), keeping DB query params unchanged for numeric IDs.
+
+## 2025-12-24 07:45 UTC
+- Added a CSV-backed team switcher to the Team HR dashboard (`src/features/team-dashboard/components/TeamSelector.tsx` wired into `src/features/team-dashboard/components/TeamHeader.tsx`), so users can swap teams without DB dependency (Retrosheet team IDs preserved).
+- Expanded the Team HR Trend card (`src/features/team-dashboard/components/TeamHrTrendCard.tsx`) with a “Recent games” selector, newest-first ordering, and opponent/opposing-starter columns; extended team dashboard types/mappers to carry `opponent`/`opposingSp` without breaking DB responses.
+- Added date anchoring for CSV player dashboards (`src/app/api/player-dashboard/route.ts` + `src/lib/api/fetchPlayerDashboard.ts`), returning available dates/months + effective date, and surfaced Month/Date selectors on `/player` via `src/features/player-dashboard/components/PlayerFilters.tsx`.
+- Improved `/picks` date UX with a Month selector that filters the date list (`src/features/hr-picks/HrPicksPage.tsx`), keeping date as the source of truth and avoiding long scroll lists.
+
+## 2025-12-24 09:10 UTC
+- Switched `/api/player-dashboard` and `/api/team-dashboard` to CSV-first in auto mode (server-side CSV attempt + DB fallback only when CSV is missing/empty), with server-only backend logs for transparency and no UI contract changes.
+- Added PA-level recent-form windows (last 10/25/50 PA) using `plays.csv` via `src/lib/csv/dailyPlays.ts`, and surfaced `recentForm` on both player/team dashboard responses (season-scoped, date-anchored).
+- Added Retrosheet-based handedness splits (vs LHP/RHP) and park factor estimates: player park profiles now include `parkHrFactor`, team dashboards include `parkFactor` plus split summaries and optional `vsLHP`/`vsRHP` aggregates.
+
+## 2025-12-24 10:05 UTC
+- Added ML Phase 0/1 baseline evaluation harness `scripts/ml/eval_baselines.py` (CSV-only, time split: train seasons < 2024, test season 2024) that materializes `pa_features_v1.csv`/`pa_labels_v1.csv` from processed outputs when missing, validates the v1 schema/labels, and evaluates baseline models with log loss/Brier/calibration/lift outputs.
+
+## 2025-12-24 10:20 UTC
+- Extended `scripts/ml/build_pa_events.py` to populate canonical ML v1 feature columns (player/team/opponent IDs, ballpark_id, pitcher_hand, is_home, pa_index_in_game) directly from daily logs `plays.csv`, preserving existing PA grain and `pa_id` determinism.
+- Updated `docs/ml/PA_DATA_CONTRACT.md` to document the canonical v1 columns required for ML baselines and note daily logs as the required source for those fields.
+
+## 2025-12-24 10:35 UTC
+- Added `scripts/ml/materialize_pa_features_v1.py` to build `pa_features_v1_enriched.csv` from `pa_features_v1.csv` + `pa_labels_v1.csv` with strictly time-aware rolling player/pitcher rates, season/career rates, and park HR factor (league-normalized), without leakage. Output is deterministic and input row order is preserved.
+
+## 2025-12-24 10:50 UTC
+- Added `scripts/ml/train_pa_logreg_v1.py` to train a simple logistic regression (no dependencies) on `pa_features_v1_enriched.csv` with the fixed time split (train seasons < 2024, test season 2024), report log loss/Brier/lift metrics, write calibration curves, and export `pa_predictions_v1.csv`. No app or DB changes.
+
+## 2025-12-24 10:55 UTC
+- Stabilized sigmoid math in `scripts/ml/train_pa_logreg_v1.py` to prevent overflow during training/inference/calibration; no changes to data contracts or feature inputs.
+
+## 2025-12-24 11:00 UTC
+- Fixed lift metric formatting in `scripts/ml/train_pa_logreg_v1.py` when lift is undefined (zero HR rate), preventing runtime errors during metrics reporting.
+
+## 2025-12-24 11:10 UTC
+- Ensured `scripts/ml/materialize_pa_features_v1.py` carries `is_hr` into `pa_features_v1_enriched.csv` (single-file training input) and made `scripts/ml/train_pa_logreg_v1.py` fail loudly if the label column is missing or invalid.
+
+## 2025-12-24 11:25 UTC
+- Added categorical context to ML Phase 2: `scripts/ml/materialize_pa_features_v1.py` now joins `batter_hand` and computes time-aware `ballpark_id_bucketed` (top 15 prior parks, else `OTHER`), and `scripts/ml/train_pa_logreg_v1.py` one-hot encodes these categories with L2-regularized logistic regression. Outputs renamed to `pa_predictions_v1_cat.csv` + `pa_logreg_v1_cat_calibration.json`.
+
+## 2025-12-24 11:40 UTC
+- Added matchup interaction feature (`matchup_rate = player_hr_rate_season_to_date * pitcher_hr_allowed_rate_season_to_date`) to `scripts/ml/materialize_pa_features_v1.py` and included it in `scripts/ml/train_pa_logreg_v1.py` with explicit baseline log-loss comparisons and versioned outputs (`pa_predictions_v1_matchup.csv`, `pa_logreg_v1_matchup_calibration.json`).
+
+## 2025-12-24 12:10 UTC
+- Added Phase 3 GBDT training script `scripts/ml/train_pa_gbdt_v1.py` (sklearn GradientBoostingClassifier with fixed params, numeric features only, time split train < 2024/test 2024), plus versioned outputs (`pa_predictions_v1_gbdt.csv`, `pa_gbdt_v1_calibration.json`). Documented `requirements-ml.txt` for the ML-only dependency; no UI/API changes.
+
+## 2025-12-24 12:25 UTC
+- Added `scripts/ml/build_player_game_rankings_v1.py` to aggregate PA-level GBDT predictions into daily player-game rankings (`player_game_hr_rankings_v1.csv`) using max PA score and ≥1 HR probability; updated GBDT prediction exports with game/team context for deterministic aggregation.
+
+## 2025-12-24 12:45 UTC
+- Added `scripts/ml/train_pa_gbdt_v1_all_seasons.py` to generate leakage-free, per-season GBDT predictions (train on seasons < Y, score season Y) and export `pa_predictions_v1_gbdt_all_seasons.csv` plus summary metrics (`pa_gbdt_v1_all_seasons_summary.csv`). Updated `scripts/ml/build_player_game_rankings_v1.py` to accept `--input/--output` for all-season rankings.
+
+## 2025-12-24 13:05 UTC
+- Wired `/picks` to prefer ML rankings via `fetchMlHrPicks` (uses `player_game_hr_rankings_v1_all_seasons.csv` when present, otherwise falls back to baseline); no UI contract changes, baseline explanations preserved.
+
+## 2025-12-24 13:30 UTC
+- Phase 4A explainability hooks: `build_player_game_rankings_v1.py` now appends offline explainability columns and writes `model_versions.json` with ranking invariants enforced; added `validate_rankings_v1.py` for ranking sanity checks and `publish_rankings.py` to optionally export rankings to `public/data`.
+
+## 2025-12-24 13:45 UTC
+- Fixed Phase 4A rankings builder diagnostics to avoid escaped f-string syntax issues by switching non-null summary prints to `.format`, keeping ranking order and outputs unchanged.
+
+## 2025-12-24 14:05 UTC
+- Phase 4B: surfaced optional ML explainability tooltip on `/picks` using additive fields (`top_signal`, recent rates, matchup/park factors) from rankings CSV; no ranking order changes and baseline fallback remains unchanged.
+
+## 2025-12-24 14:20 UTC
+- Added dev-only model version badge on `/picks` (reads `scripts/ml/data/model_versions.json`) and optional confidence labels derived from ML aggregate HR probabilities; baseline fallback unchanged and no ranking logic modified.
+
+## 2025-12-24 14:35 UTC
+- Phase 5: added `scripts/ml/monitor_hr_picks_v1.py` for CSV-only daily hit-rate monitoring (top 5/10, baseline top 5, random expectation) plus product copy guidance in `docs/frontend/ML_PICKS_COPY.md`. No model or ranking logic changes.
+
+## 2025-12-24 15:00 UTC
+- Phase 5.5: added `/picks` trust UX (model status indicator, top edge highlight, movement notes, confidence tiers) using monitoring + rankings CSVs only; rewrote explainability bullets into broadcast-style language; ranking order and baseline fallback unchanged.
+
+## 2025-12-24 15:25 UTC
+- Phase 6 trust layer: added rank stability labels, yesterday recap line, confidence tier definitions (tooltip-only), and tightened movement copy on `/picks`; all CSV-only with quiet fallback on missing data.
