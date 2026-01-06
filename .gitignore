@@ -1,1 +1,29 @@
+# ML data outputs (keep large artifacts out of git)
+data/ml/raw/
+data/ml/processed/
+scripts/ml/data/
+public/data/player_game_baseline.csv
+public/data/season_metadata.json
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Playwright
+playwright-report/
+test-results/
+
+# OS
+.DS_Store
+
+# Data (raw, generated, or external)
+data_sources/
+data/
+*.csv
+*.parquet
+
+# ML artifacts
+models/
+artifacts/
+outputs/
 .venv-ml/
